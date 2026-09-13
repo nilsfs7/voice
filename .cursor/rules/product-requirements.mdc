@@ -1,0 +1,11 @@
+---
+description: Product requirements live in AGENTS.md — keep them current when brainstorming
+alwaysApply: true
+---
+
+# Voice product requirements
+
+- Source of truth: `AGENTS.md` at the repo root.
+- When the user adds, changes, or rejects a requirement in chat, update `AGENTS.md` before implementing.
+- Do not invent product behavior for open questions (`Q-*`) or `proposed` items unless asked to build.
+- Prefer accepted requirements; keep IDs, status, and the change log accurate.
