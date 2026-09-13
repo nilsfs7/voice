@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    env:
+      TAGS: nilsfs7/fsmeet-voice:dev
+      AUTH_URL: https://dev.voice.fsmeet.dffb.org
+      BACKEND_URL_FSMEET: https://api.dev.fsmeet.dffb.org
+      FRONTEND_URL_FSMEET: https://dev.fsmeet.dffb.org
+    steps:
+      - name: Set environment by branch
+        id: build-args
+        run: |
+          echo "BUILD_TIME=$(date -u +'%Y-%m-%d %H:%M:%S')" >> "$GITHUB_ENV"
+          if [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+              echo "set values for production image"
+              
+              echo "TAGS=nilsfs7/fsmeet-voice:latest,nilsfs7/fsmeet-voice:prod" >> "$GITHUB_ENV"
+              echo "AUTH_URL=https://voice.fsmeet.com" >> "$GITHUB_ENV"
+              echo "BACKEND_URL_FSMEET=https://api.fsmeet.dffb.org" >> "$GITHUB_ENV"
+              echo "FRONTEND_URL_FSMEET=https://fsmeet.com" >> "$GITHUB_ENV"
+          fi
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          file: ./Dockerfile
+          no-cache: true
+          tags: ${{ env.TAGS }}
+          build-args: |
+            AUTH_URL=${{ env.AUTH_URL }}
+            BACKEND_URL_FSMEET=${{ env.BACKEND_URL_FSMEET }}
+            FRONTEND_URL_FSMEET=${{ env.FRONTEND_URL_FSMEET }}
+            BUILD_TIME=${{ env.BUILD_TIME }}
