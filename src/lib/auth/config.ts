@@ -53,7 +53,7 @@ export function getFsmeetOAuthConfig(): FsmeetOAuthConfig | null {
   if (!clientId) return null;
 
   const scopesRaw =
-    process.env.FSMEET_OAUTH_SCOPES?.trim() || "openid profile email";
+    process.env.FSMEET_OAUTH_SCOPES?.trim() || "openid profile";
   const scopes = scopesRaw.split(/[\s,]+/).filter(Boolean);
 
   return {
