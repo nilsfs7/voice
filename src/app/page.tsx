@@ -72,12 +72,15 @@ export default async function HomePage({
 
   return (
     <div className="space-y-10">
-      <section className="max-w-2xl space-y-4">
-        <p className="text-sm font-medium tracking-wide text-accent uppercase">
-          {messages.app.name}
-        </p>
-        <h1 className="display text-4xl leading-tight font-semibold sm:text-5xl">
-          {messages.home.title}
+      <section className="mx-auto max-w-2xl space-y-4 text-center">
+        <h1 className="text-4xl leading-tight font-medium tracking-tight text-text sm:text-5xl">
+          <span className="block">
+            {messages.home.sloganBefore}
+            <span className="slogan-brand text-[1.12em] text-accent">
+              {messages.home.sloganHighlight}
+            </span>
+          </span>
+          <span className="block">{messages.home.sloganLine2}</span>
         </h1>
         <p className="text-lg text-text-muted">{messages.home.subtitle}</p>
       </section>

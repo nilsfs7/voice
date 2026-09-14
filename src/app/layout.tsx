@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Source_Serif_4 } from "next/font/google";
+import { DM_Sans, Fraunces, Source_Serif_4 } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { readSessionUser } from "@/lib/auth/session";
@@ -14,6 +14,11 @@ const dmSans = DM_Sans({
 const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
   variable: "--font-source-serif",
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
 });
 
 export const dynamic = "force-dynamic";
@@ -36,7 +41,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} ${sourceSerif.variable} antialiased`}>
+      <body
+        className={`${dmSans.variable} ${sourceSerif.variable} ${fraunces.variable} antialiased`}
+      >
         <div className="flex min-h-screen flex-col">
           <Header user={user} messages={messages} />
           <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6">

@@ -16,8 +16,10 @@
     "logout": "Log out"
   },
   "home": {
-    "title": "Community decisions",
-    "subtitle": "Create polls, discuss options, and cast a vote that is taken seriously.",
+    "sloganBefore": "your ",
+    "sloganHighlight": "Voice",
+    "sloganLine2": "for the community",
+    "subtitle": "The official football freestyle governance system",
     "empty": "No published polls yet.",
     "totalVotes": "{count} votes",
     "totalComments": "{count} comments",

@@ -56,7 +56,8 @@ export async function GET(req: Request) {
     });
     await clearOAuthPendingCookie();
     return NextResponse.redirect(`${getSiteUrl()}${pending.returnTo || "/"}`);
-  } catch {
+  } catch (err) {
+    console.error("[voice] OAuth callback failed", err);
     return fail("oauth_exchange_failed");
   }
 }
