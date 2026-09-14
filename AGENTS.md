@@ -16,6 +16,7 @@ Living product requirements for AI agents working on this repo. Treat this file 
 6. Prefer small, reviewable changes that map to accepted requirements.
 7. Voice does **not** own user accounts. Authenticate against the FSMeet backend (OAuth). Persist Voice-owned data in MySQL using **snake_case** table and column names.
 8. Follow **§7 Design system** for all UI. Prefer civic / product-trust aesthetics over crypto, gaming, or flashy dashboard tropes.
+9. When adding a **new public page** (SEO-visible), add its path to `src/lib/seo/public-paths.ts` so `/sitemap.xml` stays complete (TECH-11).
 
 ---
 
@@ -73,6 +74,10 @@ Voice is one of three related systems.
 | TECH-07 | MySQL **table and column names use snake_case** | must | accepted | e.g. `poll_options`, `created_at` |
 | TECH-08 | CI builds on push to `main` / `dev`, PRs to `main`, and `workflow_dispatch` | must | accepted | See §3.1 |
 | TECH-09 | Docker Hub image: `nilsfs7/fsmeet-voice` (`:dev` on non-main; `:latest` + `:prod` on `main`) | must | accepted | Secrets: `DOCKER_USERNAME`, `DOCKER_PASSWORD` |
+| TECH-10 | Configurable **default** for the poll editor’s **minimum age** field; **default 12** | must | accepted | Env `VOICE_MIN_AGE`; used only as the form default (FR-PO-005). **Not** a global gate — age limits apply per poll when set |
+| TECH-11 | SEO **sitemap** at `/sitemap.xml`, generated dynamically so it stays current | must | accepted | Next.js `app/sitemap.ts`. Includes public static pages (registry: `src/lib/seo/public-paths.ts` — add a path when creating a new public page) and all **published**, non-deleted polls (prefer alias URL). Auth-only routes excluded (`/my-votes`, `/polls/new`, edit). Regenerates on request so new polls appear without redeploy |
+| TECH-12 | Local Docker Compose includes an **Adminer** container to inspect the Voice MySQL database | must | accepted | Containers: `voice-db` (MySQL), `voice-adminer`; UI at http://localhost:9080; server `mysql`, user/password/db `voice` (dev only — not for production) |
+| TECH-13 | Poll text fields are **trimmed** before persistence | must | accepted | Question, description, option label/description, country/continental codes; empty optional strings stored as `NULL` |
 
 ### 3.1 CI / Docker Hub (`.github/workflows/ci.yml`)
 
@@ -125,6 +130,7 @@ Identity and profile live in FSMeet. Each FSMeet user has a `user_type` (concept
 | **Poll option** | One selectable answer on a poll (excludes system abstention); may include an optional description | Voice |
 | **Abstention** (`Enthaltung`) | System ballot option: counts as participation without choosing an answer; mutually exclusive with all other options; **included in chart denominators** | Voice |
 | **Ballot / participation** | A user’s selection(s) on a poll (one participation per user; changeable until expiry) | Voice |
+| **Creator ballot roster** | Creator-only view of **who** voted and **for which** option(s) / abstention — transparency for the poll owner | Voice |
 | **My votes** | Authenticated user’s overview of polls they participated in and their answers | Voice |
 | **Poll score vote** | Up/down vote on a poll for importance ranking (not by the poll creator; score starts at 1 via creator self-upvote) | Voice |
 | **Result charts** | Breakdown of ballot ratios by **gender** and **age** (fixed age buckets; abstentions counted) | Voice |
@@ -154,18 +160,20 @@ Status legend: `proposed` · `accepted` · `deferred` · `rejected`
 | FR-PO-002 | A poll has multiple answer options | must | accepted | Plus system abstention (FR-VO-006) |
 | FR-PO-003 | A poll has a unique public URL suitable for linking from external websites | must | accepted | Via `public_id`; optional alias FR-PO-028 |
 | FR-PO-004 | A poll may be restricted by nationality (`country_code`, e.g. `DE`) or region (`continental_code`, e.g. `EU`) | must | accepted | Targeting filters |
-| FR-PO-005 | A poll may be restricted by minimum and/or maximum age | must | accepted | e.g. age &lt; 16, age &gt; 16 style bounds |
+| FR-PO-005 | A poll may be restricted by minimum and/or maximum age | must | accepted | When **set on the poll**, those bounds apply to **voting, commenting, and up/down scoring** on that poll (FR-VO-011, FR-CO-009, FR-PO-012b, FR-CO-003b). Editor **min age** input defaults to `VOICE_MIN_AGE` (TECH-10); empty/cleared = no min-age restriction |
 | FR-PO-006 | A poll may be restricted by gender (`male` / `female`) | must | accepted | |
 | FR-PO-007 | A poll **must** have a start date/time (`start_at`); UI default is **now** | must | accepted | Creator always sets it; default = current time |
 | FR-PO-008 | A poll always has an expiry (end) date/time | must | accepted | Required end |
 | FR-PO-009 | Only user types allowed to create polls may create them | must | accepted | §4.1 |
 | FR-PO-010 | Polls can be sorted by creation date and by end date | must | accepted | |
 | FR-PO-011 | Polls can be filtered by the creator (FSMeet user) | must | accepted | |
-| FR-PO-012 | Polls can be upvoted and downvoted to rank by importance | must | accepted | Scorers: §4.1 (not `association`, not `fan`); not on own polls — FR-PO-031 |
+| FR-PO-011b | Poll **list** can be filtered by creator **user type**: `association` or `all` (all creator types) | must | accepted | Default `all`; uses FSMeet user type of the poll creator |
+| FR-PO-012 | Polls can be upvoted and downvoted to rank by importance | must | accepted | Scorers: §4.1 (not `association`, not `fan`); not on own polls — FR-PO-031; age only if poll sets it — FR-PO-012b |
+| FR-PO-012b | Up/down-scoring a poll is subject to the poll’s **age filters only when those filters are set** on the poll (FR-PO-005) | must | accepted | No global platform age gate; missing age → hint when a set filter requires age (FR-VO-005b pattern) |
 | FR-PO-013 | At creation, a poll is defined as **single choice** or **multiple choice** | must | accepted | Immutable after publish (FR-PO-014) |
 | FR-PO-014 | Unpublished (draft) polls can be edited; after publish they are **not** editable | must | accepted | |
 | FR-PO-015 | Only the **poll creator** may delete the poll | must | accepted | Soft-delete (FR-PO-021); drafts and published |
-| FR-PO-016 | Each poll provides charts of voting ratios by **gender** and by **age** | must | accepted | Visible with live shares (FR-PO-023/025); abstentions counted (FR-PO-026); age buckets FR-PO-027 |
+| FR-PO-016 | Each poll provides charts of voting ratios by **gender** and by **age** | must | accepted | Visible with live shares (FR-PO-023/025); abstentions counted (FR-PO-026); age buckets FR-PO-027; collapsed UI FR-PO-033 |
 | FR-PO-017 | The poll **question is the title**; an optional **description** may elaborate on the question | must | accepted | No separate title field beyond the question |
 | FR-PO-018 | Each answer option may have a **description** to explain it further | must | accepted | Optional per option |
 | FR-PO-019 | A poll displays the creator’s **profile picture**, **first name**, and **last name** | must | accepted | From FSMeet user data |
@@ -181,12 +189,15 @@ Status legend: `proposed` · `accepted` · `deferred` · `rejected`
 | FR-PO-029 | Poll **list cards** show **total comments** (current comment count) alongside other meta (e.g. total votes) | must | accepted | Roots + replies; exclude soft-deleted comments from the count |
 | FR-PO-030 | Poll **list cards** show **remaining time** until `end_at`: whole **days left** while more than the final calendar day remains; on the **last day**, show **“Today”** plus the end **clock time**; after expiry, show that the poll has **ended** | must | accepted | Replaces a full end datetime on the card |
 | FR-PO-031 | A user **cannot** up/down-score **their own** poll. Each poll’s score **starts at 1** (implicit creator self-upvote), stored as the creator’s `+1` score row | must | accepted | Complements FR-PO-012 |
+| FR-PO-032 | Poll **detail** shows the poll’s **audience rules** when set: age (`min_age` / `max_age`), `gender`, `country_code`, `continental_code` | must | accepted | Only display fields that are set; omit the rules block entirely if none are set |
+| FR-PO-033 | When detailed results are visible, **Answer shares** are shown by default; **Share analytics** (By gender, By age, and any similar demographic breakdowns) are **collapsible** and **collapsed by default** | must | accepted | Complements FR-PO-016/025; expand/collapse is client UI only |
+| FR-PO-034 | The **poll creator** can see a **named ballot roster**: exactly **which user** voted for **which** answer option(s) (or abstention); the roster is **downloadable as CSV** | must | accepted | Creator-only (not public); includes abstentions and multi-choice selections; available on the poll detail for published polls (open or expired); purpose: governance transparency; independent of live-shares (FR-PO-023); **collapsible**, **collapsed by default**; CSV columns include voter identity and answer |
 
 ### 6.3 Voting (ballot on poll options)
 
 | ID | Requirement | Priority | Status | Notes |
 | --- | --- | --- | --- | --- |
-| FR-VO-001 | Only eligible user types may cast a ballot | must | accepted | §4.1 (not `association`) |
+| FR-VO-001 | Only eligible user types may cast a ballot | must | accepted | §4.1 (not `association`); age only if poll sets filters — FR-VO-011 |
 | FR-VO-002 | A user may participate in a given poll at most once | must | accepted | One active ballot record |
 | FR-VO-003 | A user may change their answer until the poll has expired | must | accepted | |
 | FR-VO-004 | Casting / changing a ballot requires FSMeet OAuth authentication | must | accepted | FR-AU-001 |
@@ -197,19 +208,22 @@ Status legend: `proposed` · `accepted` · `deferred` · `rejected`
 | FR-VO-008 | Single-choice polls: at most one answer option (or Abstention alone) | must | accepted | |
 | FR-VO-009 | Multiple-choice polls: one or more answer options, unless Abstention is selected (then none) | must | accepted | |
 | FR-VO-010 | Authenticated users have a **My votes** overview listing every poll they participated in and their answer(s) | must | accepted | Includes abstentions; link through to each poll |
+| FR-VO-011 | Age limits for casting/changing a ballot apply **only when the poll has explicit age filters** (FR-PO-005) | must | accepted | No global platform age gate; if a set filter needs age and it is missing → FR-VO-005b |
 
 ### 6.4 Comments
 
 | ID | Requirement | Priority | Status | Notes |
 | --- | --- | --- | --- | --- |
-| FR-CO-001 | Any authenticated FSMeet user type can comment under a poll | must | accepted | All types in §4.1 |
+| FR-CO-001 | Any authenticated FSMeet user type can comment under a poll | must | accepted | All types in §4.1; age only if poll sets filters — FR-CO-009 |
 | FR-CO-002 | Comments are either **root comments** or **replies** that reference a root comment | must | accepted | One-level reply tree unless extended later |
-| FR-CO-003 | Comments can be upvoted and downvoted to show relevance | must | accepted | Scorers: §4.1 (not `association`, not `fan`); not on own comments — FR-CO-008 |
+| FR-CO-003 | Comments can be upvoted and downvoted to show relevance | must | accepted | Scorers: §4.1 (not `association`, not `fan`); not on own comments — FR-CO-008; age only if poll sets filters — FR-CO-003b |
+| FR-CO-003b | Up/down-scoring a comment is subject to the poll’s **age filters only when those filters are set** on the poll (FR-PO-005) | must | accepted | No global platform age gate; missing-age hint when required |
 | FR-CO-004 | The **poll creator** may delete comments on their poll | must | accepted | Soft-delete (FR-CO-006) |
 | FR-CO-005 | A user may delete **their own** comment | must | accepted | Soft-delete (FR-CO-006) |
 | FR-CO-006 | Comment deletion is **soft**: the row is retained; content is cleared and shown as deleted in the UI | must | accepted | Thread structure / replies remain |
 | FR-CO-007 | A comment displays the author’s **profile picture**, **first name**, and **last name** | must | accepted | From FSMeet user data; soft-deleted comments still show author identity unless later specified otherwise |
 | FR-CO-008 | A user **cannot** up/down-score **their own** comment. Each comment’s score **starts at 1** (implicit author self-upvote), stored as the author’s `+1` score row | must | accepted | Complements FR-CO-003 |
+| FR-CO-009 | Age limits for posting comments apply **only when the poll has explicit age filters** (FR-PO-005) | must | accepted | No global platform age gate; missing-age hint when required (FR-VO-005b pattern) |
 
 ### 6.5 Content pages & chrome
 
@@ -225,6 +239,8 @@ Status legend: `proposed` · `accepted` · `deferred` · `rejected`
 | FR-UI-007 | Navigation includes **My votes** for authenticated users | must | accepted | FR-VO-010 |
 | FR-UI-008 | Footer (or legal menu) links to FAQ, Imprint, and Privacy | must | accepted | |
 | FR-UI-009 | Clicking a user’s **profile picture** or **name** opens a confirm popup: “View on FSMeet?” with **No** / **Yes**; **Yes** navigates to that user’s FSMeet profile | must | accepted | Applies wherever identity is shown (poll cards, poll detail, comments, header). Profile URL: `{FSMEET_FRONTEND}/users/{username}` |
+| FR-UI-010 | Poll detail has a **clearly visible Share** control that **copies the poll’s public URL to the clipboard** so others can open it and vote | must | accepted | Prefer the alias URL when set (FR-PO-028); brief confirmation feedback after copy (e.g. “Copied”) |
+| FR-UI-011 | **Association** accounts are **visually highlighted** wherever identity is shown so they clearly stand out from other user types | must | accepted | Poll cards, poll detail, comments, header; e.g. badge + distinct avatar treatment; stay within §7 (no neon/crypto) |
 
 #### 6.5.1 Imprint content (canonical)
 
@@ -259,12 +275,13 @@ Voice is the official community governance tool for freestyle football within FS
 FSMeet users with type `association`, `dj`, `freestyler`, `event_organizer`, `mc`, or `media`.
 
 **Who can vote?**  
-FSMeet users with type `dj`, `freestyler`, `event_organizer`, `mc`, or `media`. You must sign in with your FSMeet account.
+FSMeet users with type `dj`, `freestyler`, `event_organizer`, `mc`, or `media`. You must sign in with your FSMeet account. If the poll sets a minimum/maximum age, you must meet that filter.
 
 **Who can comment?**  
-Any signed-in FSMeet user type.
+Any signed-in FSMeet user type. If the poll sets age filters, you must meet them to comment.
 
-**What is Abstention?**  
+**Who can up/down-score?**  
+Signed-in users except `association` and `fan`. You cannot score your own poll or comment. If the poll sets age filters, you must meet them to score.  
 Abstention (`Enthaltung`) records that you participated without choosing an answer option. You cannot combine it with other options. It counts toward total votes and appears in result charts.
 
 **Single vs multiple choice?**  
@@ -277,13 +294,16 @@ Yes, until the poll’s end date. After it expires, your answer is locked.
 Some polls are limited by country/region, age, or gender. Voice reads those fields from your FSMeet profile. If something is missing, update your profile on FSMeet (Account), then try again.
 
 **When do I see results and charts?**  
-Total votes are always shown. Per-option shares and gender/age charts are live only if the creator enabled that before publishing; otherwise they appear after the poll ends. Age groups: under 16, 16–20, 21–25, 26–30, 31–35, over 35.
+Total votes are always shown. Per-option shares and gender/age charts are live only if the creator enabled that before publishing; otherwise they appear after the poll ends. On the poll detail, Answer shares are shown openly; Share analytics (By gender / By age) are collapsed by default and can be expanded. Age groups: under 16, 16–20, 21–25, 26–30, 31–35, over 35.
 
 **What is “My votes”?**  
 A personal list of every poll you took part in and the answer you gave (including abstentions).
 
 **Drafts and editing?**  
 Only you see your drafts. After you publish, the poll can no longer be edited, but you can soft-delete it. Comments can be soft-deleted by you (your own) or by the poll creator.
+
+**Can the poll creator see who voted for what?**  
+Yes. For transparency, the creator of a poll can see a roster of each participant and their answer(s) or abstention. Other users only see aggregate shares/charts per the live-results rules.
 
 **How does Voice relate to FSMeet?**  
 FSMeet holds events, users, and accounts. Voice focuses on community decisions and uses FSMeet login and profile data.
@@ -314,6 +334,7 @@ Data we process
 2) Governance activity stored by Voice (MySQL)
    - Polls you create (question/title, description, options, schedule, filters, settings)
    - Your ballots / answers (including abstentions) and changes until a poll ends
+   - Named ballot details visible to the **poll creator** (who voted for which option) for governance transparency
    - Comments and replies; soft-deleted comments keep a record with cleared content
    - Up/down scores on polls and comments
    - Soft-deleted polls retained as deleted records
@@ -335,7 +356,7 @@ FSMeet and other services
 Sign-in and profile data come from FSMeet (e.g. https://fsmeet.com/ and FSMeet APIs). Voice does not replace FSMeet’s own privacy information for accounts, events, or profile management. Update account details at https://fsmeet.com/account. Related products (e.g. FreestyleActs) have their own sites and policies.
 
 Sharing
-We do not sell personal data. Data may be processed by hosting/infrastructure providers strictly to run Voice. Public or community-visible content (e.g. poll questions, comments, displayed names/avatars, and—when enabled—live or final result shares and aggregate charts) is visible according to product rules.
+We do not sell personal data. Data may be processed by hosting/infrastructure providers strictly to run Voice. Public or community-visible content (e.g. poll questions, comments, displayed names/avatars, and—when enabled—live or final result shares and aggregate charts) is visible according to product rules. The poll creator can see named ballots (which user chose which option) on their own polls; this is not shown to other users.
 
 Retention
 Active governance data is kept while needed for the service and community record. Soft-deleted comments/polls may remain as tombstones. Exact retention periods to be defined later.
@@ -347,7 +368,7 @@ Cookies / local storage
 May be used for session/authentication and essential app function. Details to be refined with the final cookie/tech stack.
 
 Children
-Voice is aimed at the freestyle football community. Where age filters apply, missing age data blocks participation until the FSMeet profile is completed.
+Voice is aimed at the freestyle football community. Age limits for voting, commenting, and up/down scoring apply only when a poll explicitly sets minimum and/or maximum age. The poll editor’s minimum-age field defaults to a configurable value (`VOICE_MIN_AGE`, default 12). Where poll age filters apply, missing age data blocks participation until the FSMeet profile is completed.
 
 Changes
 This provisional policy will be updated; material changes should be reflected on this page.
@@ -380,6 +401,7 @@ Status: `accepted` (visual direction). Refine tokens during implementation; do n
 | DES-03 | **Matte:** almost no glows; no glassmorphism excess; no neon gradients | accepted |
 | DES-04 | **Quietly premium:** subtle shadows, high-quality type, restrained motion | accepted |
 | DES-05 | Voting UI emphasizes clarity, confirmation, and weight of choice (not gamification) | accepted |
+| DES-06 | **Association** identity is visually distinct from other users (badge / treatment) without breaking the light matte system | accepted | FR-UI-011 |
 
 ### 7.3 Color & surface (token intent)
 
@@ -412,7 +434,7 @@ Define CSS variables; exact hex may be tuned in implementation.
 | --- | --- |
 | Navigation | Minimal: primary destinations only (polls, create where allowed, My votes, account/legal) |
 | Cards | Clear, simple surfaces for poll lists and detail — useful structure, not decorative chrome |
-| Poll / vote UI | Question as hero title; options easy to scan; abstention visually distinct but equal dignity; confirmation that the vote was recorded |
+| Poll / vote UI | Question as hero title; options easy to scan; abstention visually distinct but equal dignity; confirmation that the vote was recorded; **Share** control is easy to find for inviting others to vote |
 | Charts | Clean, readable; no 3D or glow; support the seriousness of results |
 | Motion | Subtle (e.g. fade/slide ~150–250ms, soft press states); 2–3 purposeful motions max per view — no continuous particles or flashy loaders |
 
@@ -538,6 +560,21 @@ Define CSS variables; exact hex may be tuned in implementation.
 | 2026-09-14 | Profile pic/name click → confirm “View on FSMeet?” then open FSMeet profile (FR-UI-009) | agent + user (DE input) |
 | 2026-09-14 | Poll list cards: remaining time in days / “Today” + time on last day (FR-PO-030) | agent + user (DE input) |
 | 2026-09-14 | No self up/down on own polls/comments; default score starts at 1 (FR-PO-031, FR-CO-008) | agent + user (DE input) |
+| 2026-09-14 | Configurable platform min age for vote/comment (default 12) — TECH-10, FR-VO-011, FR-CO-009 | agent + user (DE input) |
+| 2026-09-14 | Poll list filter by creator user type: `association` \| `all` — FR-PO-011b | agent + user (DE input) |
+| 2026-09-14 | Clearly visible Share button on poll detail copies public URL to clipboard (FR-UI-010) | agent + user (DE input) |
+| 2026-09-14 | Highlight association accounts in UI (FR-UI-011, DES-06) | agent + user (DE input) |
+| 2026-09-14 | Platform min age also for up/down score; poll editor min-age defaults to `VOICE_MIN_AGE` (FR-PO-012b, FR-CO-003b, FR-PO-005) | agent + user (DE input) |
+| 2026-09-14 | Age limits for vote/comment/score only when poll sets them; `VOICE_MIN_AGE` is editor default only (TECH-10, FR-PO-005, FR-VO-011, FR-CO-009, FR-PO-012b, FR-CO-003b) | agent + user (DE input) |
+| 2026-09-14 | Poll detail shows set audience rules (age, gender, country, continent) — FR-PO-032 | agent + user (DE input) |
+| 2026-09-14 | Share analytics (By gender / By age) collapsible, collapsed by default; Answer shares always open — FR-PO-033 | agent + user (DE input) |
+| 2026-09-14 | Rename collapsed results section label to “Share analytics” (FR-PO-033) | agent + user (DE input) |
+| 2026-09-14 | Dynamic SEO sitemap `/sitemap.xml` (public pages + published polls) — TECH-11 | agent + user (DE input) |
+| 2026-09-14 | Creator-only named ballot roster (who voted for what) for transparency — FR-PO-034 | agent + user (DE input) |
+| 2026-09-14 | Adminer container in Docker Compose for local MySQL inspection — TECH-12 | agent + user (DE input) |
+| 2026-09-14 | Creator ballot roster (“Who voted”) collapsible, collapsed by default — FR-PO-034 | agent + user (DE input) |
+| 2026-09-14 | Trim poll info and option text before DB write — TECH-13 | agent + user (DE input) |
+| 2026-09-14 | Creator ballot roster CSV download — FR-PO-034 | agent + user (DE input) |
 
 ---
 
