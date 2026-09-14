@@ -58,15 +58,19 @@ export async function POST(req: Request, ctx: Ctx) {
   if (!fsmeetUser) {
     return NextResponse.json({ error: "user_lookup_failed" }, { status: 502 });
   }
-  const ageCheck = checkPollAgeEligibility(poll, fsmeetUser.age);
-  if (!ageCheck.ok) {
-    return NextResponse.json(
-      {
-        error: ageCheck.reason,
-        missing: ageCheck.missing,
-      },
-      { status: 403 },
-    );
+  // FR-CO-010: poll creator may comment regardless of audience filters
+  const isCreator = user.username === poll.creator_username;
+  if (!isCreator) {
+    const ageCheck = checkPollAgeEligibility(poll, fsmeetUser.age);
+    if (!ageCheck.ok) {
+      return NextResponse.json(
+        {
+          error: ageCheck.reason,
+          missing: ageCheck.missing,
+        },
+        { status: 403 },
+      );
+    }
   }
 
   const parsed = z

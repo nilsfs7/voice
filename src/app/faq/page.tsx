@@ -21,7 +21,11 @@ export default function FaqPage() {
         FSMeet users with type dj, freestyler, event_organizer, mc, or media.
         You must sign in with your FSMeet account.
       </FaqItem>
-      <FaqItem title="Who can comment?">Any signed-in FSMeet user type.</FaqItem>
+      <FaqItem title="Who can comment?">
+        Any signed-in FSMeet user type. If the poll sets age filters, you must
+        meet them to comment — except the poll creator, who may always comment
+        on their own poll regardless of audience filters.
+      </FaqItem>
       <FaqItem title="What is Abstention?">
         Abstention records that you participated without choosing an answer
         option. You cannot combine it with other options. It counts toward total
