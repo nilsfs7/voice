@@ -1,0 +1,61 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: voice-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: voice
+      MYSQL_USER: voice
+      MYSQL_PASSWORD: voice
+    ports:
+      - '3307:3306'
+    volumes:
+      - voice_mysql_data:/var/lib/mysql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-uroot', '-proot']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  adminer:
+    image: adminer:4
+    container_name: voice-adminer
+    restart: unless-stopped
+    ports:
+      - '9080:8080'
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        AUTH_URL: http://localhost:3004
+        BACKEND_URL_FSMEET: https://api.dev.fsmeet.dffb.org
+        FRONTEND_URL_FSMEET: https://dev.fsmeet.dffb.org
+        BUILD_TIME: local
+    ports:
+      - '3004:3004'
+    environment:
+      AUTH_URL: http://localhost:3004
+      NEXT_PUBLIC_SITE_URL: http://localhost:3004
+      BACKEND_URL_FSMEET: https://api.dev.fsmeet.dffb.org
+      NEXT_PUBLIC_FSMEET_API_URL: https://api.dev.fsmeet.dffb.org/v1
+      FRONTEND_URL_FSMEET: https://dev.fsmeet.dffb.org
+      NEXT_PUBLIC_FSMEET_FRONTEND_URL: https://dev.fsmeet.dffb.org
+      DATABASE_URL: mysql://voice:voice@mysql:3306/voice
+      AUTH_SESSION_SECRET: ${AUTH_SESSION_SECRET:-dev-change-me}
+      FSMEET_OAUTH_CLIENT_ID: ${FSMEET_OAUTH_CLIENT_ID:-voice}
+      FSMEET_OAUTH_CLIENT_SECRET: ${FSMEET_OAUTH_CLIENT_SECRET:-}
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  voice_mysql_data:
