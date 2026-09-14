@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FsmeetProfileTrigger } from "@/components/FsmeetProfileTrigger";
 import { HomeFilters } from "@/components/HomeFilters";
 import { displayName } from "@/lib/capabilities";
+import { voiceScript } from "@/lib/fonts";
 import { fetchFsmeetUsers } from "@/lib/fsmeet/users";
 import { formatCount, t } from "@/lib/i18n";
 import { readSessionUser } from "@/lib/auth/session";
@@ -76,7 +77,9 @@ export default async function HomePage({
         <h1 className="text-4xl leading-tight font-medium tracking-tight text-text sm:text-5xl">
           <span className="block">
             {messages.home.sloganBefore}
-            <span className="slogan-brand text-[1.12em] text-accent">
+            <span
+              className={`slogan-brand inline-block text-[1.4em] text-accent sm:text-[1.5em] ${voiceScript.className}`}
+            >
               {messages.home.sloganHighlight}
             </span>
           </span>

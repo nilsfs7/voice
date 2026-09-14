@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { SessionUser } from "@/lib/auth/session";
 import { canCreatePoll } from "@/lib/capabilities";
 import { isFsmeetOAuthConfigured } from "@/lib/auth/config";
+import { voiceScript } from "@/lib/fonts";
 import type { Messages } from "@/lib/i18n";
 import { FsmeetProfileTrigger } from "@/components/FsmeetProfileTrigger";
 
@@ -17,7 +18,10 @@ export function Header({
   return (
     <header className="border-b border-border/80 bg-surface/90 backdrop-blur-sm">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <Link href="/" className="display text-2xl font-semibold tracking-tight">
+        <Link
+          href="/"
+          className={`slogan-brand text-[1.85rem] leading-none text-accent sm:text-[2rem] ${voiceScript.className}`}
+        >
           {messages.app.name}
         </Link>
         <nav className="flex flex-wrap items-center justify-end gap-2 text-sm sm:gap-3">
