@@ -15,9 +15,10 @@ Official freestyle football community governance app (part of FSMeet).
 cp .env.example .env
 docker compose up -d mysql adminer
 npm install
-npm run db:migrate
 npm run dev
 ```
+
+Schema/migrations apply automatically on server start when `DATABASE_URL` is set (TECH-14). Manual: `npm run db:migrate`.
 
 Open http://localhost:3004 · Adminer (DB UI): http://localhost:9080  
 Login: System **MySQL**, Server **mysql**, Username **voice**, Password **voice**, Database **voice**.  

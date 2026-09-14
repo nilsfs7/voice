@@ -1,12 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import mysql from "mysql2/promise";
-
-const databaseUrl = process.env.DATABASE_URL;
-if (!databaseUrl) {
-  console.error("DATABASE_URL is required");
-  process.exit(1);
-}
 
 function statementsFromFile(filePath) {
   const sql = fs
@@ -20,17 +15,27 @@ function statementsFromFile(filePath) {
     .filter(Boolean);
 }
 
-const connection = await mysql.createConnection(databaseUrl);
-try {
-  const schemaPath = path.join(process.cwd(), "db", "schema.sql");
-  const schemaStatements = statementsFromFile(schemaPath);
-  for (const statement of schemaStatements) {
-    await connection.query(statement);
+/** Apply schema + migrations (TECH-14). Idempotent. */
+export async function runMigrations() {
+  const databaseUrl = process.env.DATABASE_URL?.trim();
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL is required");
   }
-  console.log(`Applied ${schemaStatements.length} statements from db/schema.sql`);
 
-  const migrationsDir = path.join(process.cwd(), "db", "migrations");
-  if (fs.existsSync(migrationsDir)) {
+  const connection = await mysql.createConnection(databaseUrl);
+  try {
+    const schemaPath = path.join(process.cwd(), "db", "schema.sql");
+    const schemaStatements = statementsFromFile(schemaPath);
+    for (const statement of schemaStatements) {
+      await connection.query(statement);
+    }
+    console.log(
+      `[voice] Applied ${schemaStatements.length} statements from db/schema.sql`,
+    );
+
+    const migrationsDir = path.join(process.cwd(), "db", "migrations");
+    if (!fs.existsSync(migrationsDir)) return;
+
     const files = fs
       .readdirSync(migrationsDir)
       .filter((f) => f.endsWith(".sql"))
@@ -40,18 +45,31 @@ try {
       for (const statement of statementsFromFile(filePath)) {
         try {
           await connection.query(statement);
-          console.log(`OK ${file}: ${statement.slice(0, 72).replace(/\s+/g, " ")}`);
+          console.log(
+            `[voice] OK ${file}: ${statement.slice(0, 72).replace(/\s+/g, " ")}`,
+          );
         } catch (error) {
           const code = error?.code;
           if (code === "ER_DUP_FIELDNAME" || code === "ER_DUP_KEYNAME") {
-            console.log(`Skip ${file} (${code})`);
+            console.log(`[voice] Skip ${file} (${code})`);
             continue;
           }
           throw error;
         }
       }
     }
+  } finally {
+    await connection.end();
   }
-} finally {
-  await connection.end();
+}
+
+const isCli =
+  Boolean(process.argv[1]) &&
+  fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
+
+if (isCli) {
+  runMigrations().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
 }
