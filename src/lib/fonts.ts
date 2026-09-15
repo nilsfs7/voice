@@ -1,4 +1,4 @@
-import { Dancing_Script, DM_Sans, Source_Serif_4 } from "next/font/google";
+import { DM_Sans, Kaushan_Script, Source_Serif_4 } from "next/font/google";
 
 export const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -10,9 +10,12 @@ export const sourceSerif = Source_Serif_4({
   variable: "--font-source-serif",
 });
 
-/** Script for the “Voice” wordmark (slogan + header). */
-export const voiceScript = Dancing_Script({
-  weight: ["600", "700"],
+/**
+ * Confident brush script for the “Voice” wordmark (slogan + header).
+ * Swung enough to feel personal, bold enough to feel like a real voice.
+ */
+export const voiceScript = Kaushan_Script({
+  weight: "400",
   subsets: ["latin"],
   variable: "--font-voice-script",
 });

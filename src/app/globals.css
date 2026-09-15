@@ -299,7 +299,7 @@ select {
 }
 
 .slogan-brand {
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: 0.01em;
-  line-height: 0.9;
+  line-height: 0.95;
 }
