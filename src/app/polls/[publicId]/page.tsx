@@ -7,7 +7,7 @@ import { PollAudienceRules } from '@/components/PollAudienceRules';
 import { ResultCharts } from '@/components/ResultCharts';
 import { SharePollButton } from '@/components/SharePollButton';
 import { VotePanel } from '@/components/VotePanel';
-import { canCreatePoll, canScore, canVote, checkVotePresenceGate, displayName } from '@/lib/capabilities';
+import { canCreatePoll, canScore, canVote, checkVotePresenceGate, displayName, isVoiceAdmin } from '@/lib/capabilities';
 import { getFsmeetAccessToken, readSessionUser } from '@/lib/auth/session';
 import { getSiteUrl } from '@/lib/env';
 import { fetchFsmeetUser, fetchFsmeetUsers } from '@/lib/fsmeet/users';
@@ -120,6 +120,7 @@ export default async function PollPage({ params }: Ctx) {
   const userCanVote = Boolean(user && canVote(user.type) && open);
   const userCanScore = Boolean(user && canScore(user.type) && ageGate.ok);
   const isCreator = user?.username === poll.creator_username;
+  const isAdmin = isVoiceAdmin(user?.username);
   const shareUrl = `${getSiteUrl()}${pollHref(poll)}`;
 
   let rosterEntries: {
@@ -183,6 +184,15 @@ export default async function PollPage({ params }: Ctx) {
         <PollAudienceRules countryCode={poll.country_code} continentalCode={poll.continental_code} minAge={poll.min_age} maxAge={poll.max_age} gender={poll.gender} />
         {poll.status === 'published' ? <SharePollButton url={shareUrl} /> : null}
         {isCreator ? <PollActions publicId={poll.alias || poll.public_id} status={poll.status} canEdit={poll.status === 'draft' && canCreatePoll(user!.type)} /> : null}
+        {isAdmin && !isCreator ? (
+          <PollActions
+            publicId={poll.alias || poll.public_id}
+            status={poll.status}
+            canEdit={false}
+            canPublish={false}
+            canDelete
+          />
+        ) : null}
         {userCanScore && !isCreator && poll.status === 'published' ? (
           <div className="flex gap-2">
             <ScoreForm publicId={poll.alias || poll.public_id} value={1} label="Upvote" />

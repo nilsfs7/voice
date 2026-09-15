@@ -1,4 +1,5 @@
 import type { ResultSetHeader, RowDataPacket } from "mysql2/promise";
+import { isVoiceAdmin } from "@/lib/capabilities";
 import { execute, queryRows, withTransaction } from "@/lib/db/pool";
 
 export type CommentRow = RowDataPacket & {
@@ -70,6 +71,7 @@ export async function softDeleteComment(input: {
   const comment = rows[0];
   if (!comment || comment.deleted_at) return false;
   const allowed =
+    isVoiceAdmin(input.actorUsername) ||
     comment.author_username === input.actorUsername ||
     input.pollCreatorUsername === input.actorUsername;
   if (!allowed) return false;
