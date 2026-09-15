@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { FsmeetProfileTrigger } from "@/components/FsmeetProfileTrigger";
+import { isVoiceAdmin } from "@/lib/capabilities";
 import { t } from "@/lib/i18n";
 
 type Comment = {
@@ -178,8 +179,10 @@ export function CommentsSection({
                 canScore && currentUsername !== comment.authorUsername
               }
               canDelete={
-                currentUsername === comment.authorUsername ||
-                currentUsername === pollCreatorUsername
+                Boolean(currentUsername) &&
+                (isVoiceAdmin(currentUsername) ||
+                  currentUsername === comment.authorUsername ||
+                  currentUsername === pollCreatorUsername)
               }
               onReply={() => setReplyTo(comment.id)}
               onDelete={() => remove(comment.id)}
@@ -195,8 +198,10 @@ export function CommentsSection({
                     canScore && currentUsername !== reply.authorUsername
                   }
                   canDelete={
-                    currentUsername === reply.authorUsername ||
-                    currentUsername === pollCreatorUsername
+                    Boolean(currentUsername) &&
+                    (isVoiceAdmin(currentUsername) ||
+                      currentUsername === reply.authorUsername ||
+                      currentUsername === pollCreatorUsername)
                   }
                   onDelete={() => remove(reply.id)}
                   onScore={score}

@@ -8,10 +8,15 @@ export function PollActions({
   publicId,
   status,
   canEdit,
+  canPublish = true,
+  canDelete = true,
 }: {
   publicId: string;
   status: "draft" | "published";
   canEdit: boolean;
+  /** Creator-only publish (admin soft-delete does not imply publish). */
+  canPublish?: boolean;
+  canDelete?: boolean;
 }) {
   const messages = t();
   const router = useRouter();
@@ -34,7 +39,7 @@ export function PollActions({
 
   return (
     <div className="flex flex-wrap gap-2">
-      {status === "draft" ? (
+      {status === "draft" && canPublish ? (
         <button className="btn btn-primary text-sm" onClick={publish}>
           {messages.poll.publish}
         </button>
@@ -44,9 +49,11 @@ export function PollActions({
           {messages.poll.edit}
         </Link>
       ) : null}
-      <button className="btn btn-danger text-sm" onClick={remove}>
-        {messages.poll.delete}
-      </button>
+      {canDelete ? (
+        <button className="btn btn-danger text-sm" onClick={remove}>
+          {messages.poll.delete}
+        </button>
+      ) : null}
     </div>
   );
 }

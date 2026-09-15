@@ -1,5 +1,6 @@
 import type { PoolConnection, ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import { customAlphabet } from "nanoid";
+import { isVoiceAdmin } from "@/lib/capabilities";
 import { execute, queryRows, withTransaction } from "@/lib/db/pool";
 import { isValidAlias, normalizeAlias } from "@/lib/polls/alias";
 
@@ -264,12 +265,20 @@ export async function publishPoll(
 
 export async function softDeletePoll(
   slug: string,
-  creatorUsername: string,
+  actorUsername: string,
 ): Promise<boolean> {
+  if (isVoiceAdmin(actorUsername)) {
+    const result = await execute(
+      `UPDATE polls SET deleted_at = UTC_TIMESTAMP()
+       WHERE (public_id = ? OR alias = ?) AND deleted_at IS NULL`,
+      [slug, slug],
+    );
+    return result.affectedRows > 0;
+  }
   const result = await execute(
     `UPDATE polls SET deleted_at = UTC_TIMESTAMP()
      WHERE (public_id = ? OR alias = ?) AND creator_username = ? AND deleted_at IS NULL`,
-    [slug, slug, creatorUsername],
+    [slug, slug, actorUsername],
   );
   return result.affectedRows > 0;
 }

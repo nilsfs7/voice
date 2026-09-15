@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireCreatePollAccess } from "@/lib/auth/create-poll-access";
 import { readSessionUser } from "@/lib/auth/session";
+import { isVoiceAdmin } from "@/lib/capabilities";
 import { pollHref } from "@/lib/polls/alias";
 import {
   AliasConflictError,
@@ -135,6 +136,18 @@ export async function PUT(req: Request, ctx: Ctx) {
 }
 
 export async function DELETE(_req: Request, ctx: Ctx) {
+  const user = await readSessionUser();
+  if (!user) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  const { publicId } = await ctx.params;
+
+  if (isVoiceAdmin(user.username)) {
+    const ok = await softDeletePoll(publicId, user.username);
+    if (!ok) return NextResponse.json({ error: "not_found" }, { status: 404 });
+    return NextResponse.json({ ok: true });
+  }
+
   const access = await requireCreatePollAccess();
   if (!access.ok) {
     return NextResponse.json(
@@ -142,7 +155,6 @@ export async function DELETE(_req: Request, ctx: Ctx) {
       { status: access.status },
     );
   }
-  const { publicId } = await ctx.params;
   const ok = await softDeletePoll(publicId, access.user.username);
   if (!ok) return NextResponse.json({ error: "forbidden" }, { status: 403 });
   return NextResponse.json({ ok: true });

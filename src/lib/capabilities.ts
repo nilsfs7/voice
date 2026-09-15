@@ -75,6 +75,13 @@ export function canScore(type: UserType): boolean {
   return SCORE_TYPES.has(type);
 }
 
+/** Fixed Voice admin username (FR-AD-001 / U-07). */
+export const VOICE_ADMIN_USERNAME = "fsmeet";
+
+export function isVoiceAdmin(username: string | null | undefined): boolean {
+  return username?.trim() === VOICE_ADMIN_USERNAME;
+}
+
 export function displayName(user: Pick<FsmeetUser, "firstName" | "lastName">): string {
   return `${user.firstName} ${user.lastName}`.trim();
 }
