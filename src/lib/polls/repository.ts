@@ -300,18 +300,20 @@ export async function getPollByPublicId(
 }
 
 export async function listPolls(opts: {
-  sort?: "created_at" | "end_at" | "score";
+  sort?: "created_at" | "end_at" | "score" | "votes";
   creator?: string | null;
   viewerUsername?: string | null;
 }): Promise<PollRow[]> {
-  // Use a joined aggregate for score — ORDER BY select-list aliases is unreliable
-  // with mysql2 prepared statements (`execute`), which can ignore the alias.
+  // Use joined/expression aggregates for ORDER BY — select-list aliases are
+  // unreliable with mysql2 prepared statements (`execute`).
   const orderBy =
     opts.sort === "end_at"
       ? "p.end_at ASC, p.created_at DESC"
       : opts.sort === "score"
         ? "COALESCE(sc.score_sum, 0) DESC, p.created_at DESC"
-        : "p.created_at DESC";
+        : opts.sort === "votes"
+          ? "(SELECT COUNT(*) FROM ballots b WHERE b.poll_id = p.id) DESC, p.created_at DESC"
+          : "p.created_at DESC";
 
   const params: Array<string | number | boolean | Date | null> = [];
   let where = `p.deleted_at IS NULL AND (
@@ -341,11 +343,17 @@ export async function listPolls(opts: {
     params,
   );
 
-  // Guarantee numeric importance order even if the driver returns score as a string.
+  // Guarantee numeric order even if the driver returns aggregates as strings.
   if (opts.sort === "score") {
     rows.sort((a, b) => {
       const scoreDiff = Number(b.score ?? 0) - Number(a.score ?? 0);
       if (scoreDiff !== 0) return scoreDiff;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  } else if (opts.sort === "votes") {
+    rows.sort((a, b) => {
+      const votesDiff = Number(b.total_votes ?? 0) - Number(a.total_votes ?? 0);
+      if (votesDiff !== 0) return votesDiff;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
   }

@@ -28,7 +28,9 @@ export default async function HomePage({
   const messages = t();
   const user = await readSessionUser();
   const sort =
-    params.sort === "end_at" || params.sort === "score"
+    params.sort === "end_at" ||
+    params.sort === "score" ||
+    params.sort === "votes"
       ? params.sort
       : "created_at";
   const creatorType =
@@ -115,6 +117,7 @@ export default async function HomePage({
           sortCreated: messages.home.sortCreated,
           sortEnd: messages.home.sortEnd,
           sortScore: messages.home.sortScore,
+          sortVotes: messages.home.sortVotes,
         }}
       />
 
