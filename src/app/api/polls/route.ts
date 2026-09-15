@@ -38,7 +38,9 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const sortParam = url.searchParams.get("sort");
   const sort =
-    sortParam === "end_at" || sortParam === "score" ? sortParam : "created_at";
+    sortParam === "end_at" || sortParam === "score" || sortParam === "votes"
+      ? sortParam
+      : "created_at";
   const creator = url.searchParams.get("creator");
   const user = await readSessionUser();
   const polls = await listPolls({

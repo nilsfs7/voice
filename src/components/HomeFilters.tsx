@@ -24,6 +24,7 @@ export function HomeFilters({
     sortCreated: string;
     sortEnd: string;
     sortScore: string;
+    sortVotes: string;
   };
 }) {
   const router = useRouter();
@@ -118,6 +119,7 @@ export function HomeFilters({
             { value: "created_at", label: labels.sortCreated },
             { value: "end_at", label: labels.sortEnd },
             { value: "score", label: labels.sortScore },
+            { value: "votes", label: labels.sortVotes },
           ]}
         />
       </label>
