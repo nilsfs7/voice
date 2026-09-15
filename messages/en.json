@@ -51,6 +51,8 @@
     "voteRecorded": "Your vote has been recorded.",
     "loginToInteract": "Log in with FSMeet to vote, comment, or create polls.",
     "missingProfile": "Update your FSMeet profile to include {fields}, then return here to vote.",
+    "missingProfileVote": "Update your FSMeet profile with a verified account or an Instagram / TikTok / YouTube handle, then return here to vote.",
+    "missingProfileCreate": "Update your FSMeet profile to verified account, then return here to create a poll.",
     "updateProfile": "Open FSMeet account",
     "ineligible": "You are not eligible for this poll’s audience filters.",
     "closed": "This poll is closed.",

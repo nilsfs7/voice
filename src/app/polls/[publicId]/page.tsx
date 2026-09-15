@@ -7,7 +7,7 @@ import { PollAudienceRules } from '@/components/PollAudienceRules';
 import { ResultCharts } from '@/components/ResultCharts';
 import { SharePollButton } from '@/components/SharePollButton';
 import { VotePanel } from '@/components/VotePanel';
-import { canCreatePoll, canScore, canVote, displayName } from '@/lib/capabilities';
+import { canCreatePoll, canScore, canVote, checkVotePresenceGate, displayName } from '@/lib/capabilities';
 import { getFsmeetAccessToken, readSessionUser } from '@/lib/auth/session';
 import { getSiteUrl } from '@/lib/env';
 import { fetchFsmeetUser, fetchFsmeetUsers } from '@/lib/fsmeet/users';
@@ -47,10 +47,21 @@ export default async function PollPage({ params }: Ctx) {
   const commentAuthors = await fetchFsmeetUsers(comments.map(c => c.author_username));
 
   let ageGate: { ok: true } | { ok: false; reason: string; missing: string[] } = { ok: true };
+  let voteGate: { ok: true } | { ok: false; reason: string; missing: string[] } = { ok: true };
   if (user) {
     const accessToken = await getFsmeetAccessToken();
     const viewer = await fetchFsmeetUser(user.username, accessToken);
     ageGate = checkPollAgeEligibility(poll, viewer?.age);
+    if (canVote(user.type) && viewer) {
+      const presence = checkVotePresenceGate(viewer);
+      voteGate = presence.ok ? ageGate : presence;
+    } else if (canVote(user.type) && !viewer) {
+      voteGate = {
+        ok: false,
+        reason: 'profile_presence',
+        missing: ['verified account, or Instagram / TikTok / YouTube handle'],
+      };
+    }
   }
 
   const open = pollIsOpen({
@@ -191,7 +202,7 @@ export default async function PollPage({ params }: Ctx) {
           }))}
           canVoteNow={userCanVote}
           loggedIn={Boolean(user)}
-          ageGate={user ? ageGate : undefined}
+          ageGate={user ? voteGate : undefined}
           initial={
             ballot
               ? {
