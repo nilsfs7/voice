@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { canCreatePoll } from "@/lib/capabilities";
+import { requireCreatePollAccess } from "@/lib/auth/create-poll-access";
 import { readSessionUser } from "@/lib/auth/session";
 import { pollHref } from "@/lib/polls/alias";
 import {
@@ -65,12 +65,12 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const user = await readSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-  if (!canCreatePoll(user.type)) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  const access = await requireCreatePollAccess();
+  if (!access.ok) {
+    return NextResponse.json(
+      { error: access.error, missing: access.missing },
+      { status: access.status },
+    );
   }
 
   const body = await req.json();
@@ -94,7 +94,7 @@ export async function POST(req: Request) {
 
   try {
     const created = await createPoll({
-      creatorUsername: user.username,
+      creatorUsername: access.user.username,
       question: data.question,
       description: data.description,
       alias: data.alias,

@@ -1,8 +1,13 @@
 import { notFound, redirect } from "next/navigation";
 import { PollForm } from "@/components/PollForm";
-import { canCreatePoll } from "@/lib/capabilities";
-import { readSessionUser } from "@/lib/auth/session";
+import { ProfileGateNotice } from "@/components/ProfileGateNotice";
+import { getFsmeetAccessToken, readSessionUser } from "@/lib/auth/session";
+import {
+  canCreatePoll,
+  checkCreatePollTrustGate,
+} from "@/lib/capabilities";
 import { getVoiceMinAge } from "@/lib/env";
+import { fetchFsmeetUser } from "@/lib/fsmeet/users";
 import { getOptions, getPollByPublicId } from "@/lib/polls/repository";
 import { t } from "@/lib/i18n";
 
@@ -27,6 +32,16 @@ export default async function EditPollPage({ params }: Ctx) {
   }
   if (poll.status !== "draft") redirect(`/polls/${publicId}`);
 
+  const accessToken = await getFsmeetAccessToken();
+  const profile = await fetchFsmeetUser(user.username, accessToken);
+  const trust = profile
+    ? checkCreatePollTrustGate(profile)
+    : ({
+        ok: false as const,
+        reason: "missing_fields" as const,
+        missing: ["verified account"],
+      });
+
   const options = await getOptions(poll.id);
   const messages = t();
   const defaultMinAge = getVoiceMinAge();
@@ -34,30 +49,36 @@ export default async function EditPollPage({ params }: Ctx) {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <h1 className="display text-4xl font-semibold">{messages.poll.edit}</h1>
-      <PollForm
-        mode="edit"
-        publicId={publicId}
-        defaultMinAge={defaultMinAge}
-        initial={{
-          question: poll.question,
-          description: poll.description ?? "",
-          alias: poll.alias ?? "",
-          choiceMode: poll.choice_mode,
-          liveResultShares: Boolean(poll.live_result_shares),
-          countryCode: poll.country_code ?? "",
-          continentalCode: poll.continental_code ?? "",
-          minAge:
-            poll.min_age != null ? String(poll.min_age) : String(defaultMinAge),
-          maxAge: poll.max_age != null ? String(poll.max_age) : "",
-          gender: poll.gender ?? "",
-          startAt: toLocalInput(new Date(poll.start_at)),
-          endAt: toLocalInput(new Date(poll.end_at)),
-          options: options.map((o) => ({
-            label: o.label,
-            description: o.description ?? "",
-          })),
-        }}
-      />
+      {trust.ok ? (
+        <PollForm
+          mode="edit"
+          publicId={publicId}
+          defaultMinAge={defaultMinAge}
+          initial={{
+            question: poll.question,
+            description: poll.description ?? "",
+            alias: poll.alias ?? "",
+            choiceMode: poll.choice_mode,
+            liveResultShares: Boolean(poll.live_result_shares),
+            countryCode: poll.country_code ?? "",
+            continentalCode: poll.continental_code ?? "",
+            minAge:
+              poll.min_age != null
+                ? String(poll.min_age)
+                : String(defaultMinAge),
+            maxAge: poll.max_age != null ? String(poll.max_age) : "",
+            gender: poll.gender ?? "",
+            startAt: toLocalInput(new Date(poll.start_at)),
+            endAt: toLocalInput(new Date(poll.end_at)),
+            options: options.map((o) => ({
+              label: o.label,
+              description: o.description ?? "",
+            })),
+          }}
+        />
+      ) : (
+        <ProfileGateNotice missing={trust.missing} purpose="create" />
+      )}
     </div>
   );
 }

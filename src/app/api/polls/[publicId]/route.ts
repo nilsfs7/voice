@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { canCreatePoll } from "@/lib/capabilities";
+import { requireCreatePollAccess } from "@/lib/auth/create-poll-access";
 import { readSessionUser } from "@/lib/auth/session";
 import { pollHref } from "@/lib/polls/alias";
 import {
@@ -83,9 +83,12 @@ export async function GET(_req: Request, ctx: Ctx) {
 }
 
 export async function PUT(req: Request, ctx: Ctx) {
-  const user = await readSessionUser();
-  if (!user || !canCreatePoll(user.type)) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  const access = await requireCreatePollAccess();
+  if (!access.ok) {
+    return NextResponse.json(
+      { error: access.error, missing: access.missing },
+      { status: access.status },
+    );
   }
   const { publicId } = await ctx.params;
   const body = await req.json();
@@ -95,7 +98,7 @@ export async function PUT(req: Request, ctx: Ctx) {
   }
   const data = parsed.data;
   try {
-    const ok = await updateDraftPoll(publicId, user.username, {
+    const ok = await updateDraftPoll(publicId, access.user.username, {
       question: data.question,
       description: data.description,
       alias: data.alias,
@@ -132,25 +135,31 @@ export async function PUT(req: Request, ctx: Ctx) {
 }
 
 export async function DELETE(_req: Request, ctx: Ctx) {
-  const user = await readSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const access = await requireCreatePollAccess();
+  if (!access.ok) {
+    return NextResponse.json(
+      { error: access.error, missing: access.missing },
+      { status: access.status },
+    );
   }
   const { publicId } = await ctx.params;
-  const ok = await softDeletePoll(publicId, user.username);
+  const ok = await softDeletePoll(publicId, access.user.username);
   if (!ok) return NextResponse.json({ error: "forbidden" }, { status: 403 });
   return NextResponse.json({ ok: true });
 }
 
 export async function PATCH(req: Request, ctx: Ctx) {
-  const user = await readSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const access = await requireCreatePollAccess();
+  if (!access.ok) {
+    return NextResponse.json(
+      { error: access.error, missing: access.missing },
+      { status: access.status },
+    );
   }
   const { publicId } = await ctx.params;
   const body = (await req.json()) as { action?: string };
   if (body.action === "publish") {
-    const ok = await publishPoll(publicId, user.username);
+    const ok = await publishPoll(publicId, access.user.username);
     if (!ok) {
       return NextResponse.json({ error: "cannot_publish" }, { status: 409 });
     }

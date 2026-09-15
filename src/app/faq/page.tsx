@@ -15,11 +15,14 @@ export default function FaqPage() {
       </FaqItem>
       <FaqItem title="Who can create a poll?">
         FSMeet users with type association, dj, freestyler, event_organizer, mc,
-        or media.
+        or media — and a WFFA ID or a verified FSMeet account.
       </FaqItem>
       <FaqItem title="Who can vote?">
         FSMeet users with type dj, freestyler, event_organizer, mc, or media.
-        You must sign in with your FSMeet account.
+        You must sign in with your FSMeet account, and have at least one of: WFFA
+        ID, verified account, Instagram handle, TikTok handle, or YouTube handle
+        on your FSMeet profile. If the poll sets age filters, you must meet them
+        to vote.
       </FaqItem>
       <FaqItem title="Who can comment?">
         Any signed-in FSMeet user type. If the poll sets age filters, you must

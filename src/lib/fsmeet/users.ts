@@ -28,6 +28,10 @@ export function mapFsmeetUser(raw: Record<string, unknown>): FsmeetUser {
       : typeof ageRaw === "string" && ageRaw.trim() !== ""
         ? Number(ageRaw)
         : null;
+
+  const optionalString = (value: unknown): string | null =>
+    typeof value === "string" && value.trim() ? value.trim() : null;
+
   return {
     username: String(raw.username ?? ""),
     type: asUserType(raw.type),
@@ -41,6 +45,14 @@ export function mapFsmeetUser(raw: Record<string, unknown>): FsmeetUser {
     continentalCode:
       typeof raw.continentalCode === "string" ? raw.continentalCode : null,
     age: age != null && Number.isFinite(age) ? age : null,
+    wffaId: optionalString(raw.wffaId),
+    verificationState:
+      typeof raw.verificationState === "string"
+        ? raw.verificationState
+        : null,
+    instagramHandle: optionalString(raw.instagramHandle),
+    tikTokHandle: optionalString(raw.tikTokHandle),
+    youTubeHandle: optionalString(raw.youTubeHandle),
   };
 }
 

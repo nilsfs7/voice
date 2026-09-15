@@ -9,6 +9,12 @@ export type UserType =
   | "media"
   | "administrative";
 
+export type FsmeetVerificationState =
+  | "not_verified"
+  | "pending"
+  | "verified"
+  | string;
+
 export type FsmeetUser = {
   username: string;
   type: UserType;
@@ -19,6 +25,11 @@ export type FsmeetUser = {
   countryCode?: string | null;
   continentalCode?: string | null;
   age?: number | null;
+  wffaId?: string | null;
+  verificationState?: FsmeetVerificationState | null;
+  instagramHandle?: string | null;
+  tikTokHandle?: string | null;
+  youTubeHandle?: string | null;
 };
 
 const CREATE_TYPES = new Set<UserType>([
@@ -66,4 +77,76 @@ export function canScore(type: UserType): boolean {
 
 export function displayName(user: Pick<FsmeetUser, "firstName" | "lastName">): string {
   return `${user.firstName} ${user.lastName}`.trim();
+}
+
+function present(value: string | null | undefined): boolean {
+  return Boolean(value?.trim());
+}
+
+export function isFsmeetVerified(
+  user: Pick<FsmeetUser, "verificationState">,
+): boolean {
+  return user.verificationState === "verified";
+}
+
+/** FR-PO-009b — in addition to canCreatePoll(type). */
+export function passesCreatePollTrustGate(
+  user: Pick<FsmeetUser, "wffaId" | "verificationState">,
+): boolean {
+  return present(user.wffaId) || isFsmeetVerified(user);
+}
+
+/** FR-VO-012 — in addition to canVote(type). */
+export function passesVotePresenceGate(
+  user: Pick<
+    FsmeetUser,
+    | "wffaId"
+    | "verificationState"
+    | "instagramHandle"
+    | "tikTokHandle"
+    | "youTubeHandle"
+  >,
+): boolean {
+  return (
+    present(user.wffaId) ||
+    isFsmeetVerified(user) ||
+    present(user.instagramHandle) ||
+    present(user.tikTokHandle) ||
+    present(user.youTubeHandle)
+  );
+}
+
+export type ProfileGateResult =
+  | { ok: true }
+  | { ok: false; reason: "missing_fields" | "profile_presence"; missing: string[] };
+
+export function checkCreatePollTrustGate(
+  user: Pick<FsmeetUser, "wffaId" | "verificationState">,
+): ProfileGateResult {
+  if (passesCreatePollTrustGate(user)) return { ok: true };
+  return {
+    ok: false,
+    reason: "missing_fields",
+    missing: ["verified account"],
+  };
+}
+
+export function checkVotePresenceGate(
+  user: Pick<
+    FsmeetUser,
+    | "wffaId"
+    | "verificationState"
+    | "instagramHandle"
+    | "tikTokHandle"
+    | "youTubeHandle"
+  >,
+): ProfileGateResult {
+  if (passesVotePresenceGate(user)) return { ok: true };
+  return {
+    ok: false,
+    reason: "profile_presence",
+    missing: [
+      "verified account, or Instagram / TikTok / YouTube handle",
+    ],
+  };
 }

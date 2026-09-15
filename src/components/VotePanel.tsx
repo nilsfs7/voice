@@ -57,7 +57,9 @@ export function VotePanel({
       missing?: string[];
     };
     if (!res.ok) {
-      if (data.error === "missing_fields") {
+      if (data.error === "profile_presence") {
+        setError(messages.poll.missingProfileVote);
+      } else if (data.error === "missing_fields") {
         setMissing(data.missing ?? []);
         setError(
           messages.poll.missingProfile.replace(
@@ -98,14 +100,17 @@ export function VotePanel({
     return (
       <div className="card space-y-3 p-5">
         <p className="text-sm text-danger">
-          {ageGate.reason === "missing_fields"
-            ? messages.poll.missingProfile.replace(
-                "{fields}",
-                ageGate.missing.join(", "),
-              )
-            : messages.poll.ineligible}
+          {ageGate.reason === "profile_presence"
+            ? messages.poll.missingProfileVote
+            : ageGate.reason === "missing_fields"
+              ? messages.poll.missingProfile.replace(
+                  "{fields}",
+                  ageGate.missing.join(", "),
+                )
+              : messages.poll.ineligible}
         </p>
-        {ageGate.reason === "missing_fields" ? (
+        {ageGate.reason === "missing_fields" ||
+        ageGate.reason === "profile_presence" ? (
           <a
             className="btn btn-secondary"
             href="https://fsmeet.com/account"

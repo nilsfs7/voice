@@ -91,11 +91,16 @@ export function PollForm({
     );
     setPending(false);
     if (!res.ok) {
-      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        missing?: string[];
+      };
       if (data.error === "alias_taken") {
         setError("This URL alias is already taken.");
       } else if (data.error === "invalid_alias") {
         setError("Alias must be 3–64 characters: letters, numbers, hyphens.");
+      } else if (data.error === "missing_fields") {
+        setError(messages.poll.missingProfileCreate);
       } else {
         setError("Could not save the poll. Check required fields.");
       }

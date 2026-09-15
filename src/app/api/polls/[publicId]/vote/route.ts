@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { canVote } from "@/lib/capabilities";
+import { canVote, checkVotePresenceGate } from "@/lib/capabilities";
 import {
   getFsmeetAccessToken,
   readSessionUser,
@@ -71,6 +71,17 @@ export async function POST(req: Request, ctx: Ctx) {
   const fsmeetUser = await fetchFsmeetUser(user.username, accessToken);
   if (!fsmeetUser) {
     return NextResponse.json({ error: "user_lookup_failed" }, { status: 502 });
+  }
+
+  const presence = checkVotePresenceGate(fsmeetUser);
+  if (!presence.ok) {
+    return NextResponse.json(
+      {
+        error: "profile_presence",
+        missing: presence.missing,
+      },
+      { status: 403 },
+    );
   }
 
   const eligibility = checkAudienceEligibility(
