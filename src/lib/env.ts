@@ -3,9 +3,11 @@ function trimSlash(url: string): string {
 }
 
 export function getSiteUrl(): string {
+  // Prefer AUTH_URL so Docker runtime `-e AUTH_URL=…` overrides bake-time
+  // NEXT_PUBLIC_SITE_URL (Next inlines NEXT_PUBLIC_* at build).
   return trimSlash(
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-      process.env.AUTH_URL?.trim() ||
+    process.env.AUTH_URL?.trim() ||
+      process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
       "http://localhost:3004",
   );
 }
