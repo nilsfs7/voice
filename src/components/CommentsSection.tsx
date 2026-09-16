@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { FsmeetProfileTrigger } from "@/components/FsmeetProfileTrigger";
 import { isVoiceAdmin } from "@/lib/capabilities";
-import { t } from "@/lib/i18n";
+import { useMessages } from "@/components/I18nProvider";
+import type { Messages } from "@/lib/i18n/catalog";
 
 type Comment = {
   id: number;
@@ -39,7 +40,7 @@ export function CommentsSection({
   pollCreatorUsername: string;
   ageGate?: { ok: true } | { ok: false; reason: string; missing: string[] };
 }) {
-  const messages = t();
+  const messages = useMessages();
   const router = useRouter();
   const [body, setBody] = useState("");
   const [replyTo, setReplyTo] = useState<number | null>(null);
@@ -225,7 +226,7 @@ function CommentBody({
   onScore,
 }: {
   comment: Comment;
-  messages: ReturnType<typeof t>;
+  messages: Messages;
   canScore: boolean;
   canDelete: boolean;
   onReply?: () => void;

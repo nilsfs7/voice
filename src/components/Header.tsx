@@ -3,8 +3,9 @@ import type { SessionUser } from "@/lib/auth/session";
 import { canCreatePoll } from "@/lib/capabilities";
 import { isFsmeetOAuthConfigured } from "@/lib/auth/config";
 import { voiceScript } from "@/lib/fonts";
-import type { Messages } from "@/lib/i18n";
+import type { Messages } from "@/lib/i18n/catalog";
 import { FsmeetProfileTrigger } from "@/components/FsmeetProfileTrigger";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export function Header({
   user,
@@ -68,8 +69,9 @@ export function Header({
               {messages.nav.login}
             </Link>
           ) : (
-            <span className="muted text-xs">OAuth not configured</span>
+            <span className="muted text-xs">{messages.nav.oauthNotConfigured}</span>
           )}
+          <LanguageSwitcher />
         </nav>
       </div>
     </header>

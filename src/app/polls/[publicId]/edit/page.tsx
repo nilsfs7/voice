@@ -9,7 +9,7 @@ import {
 import { getVoiceMinAge } from "@/lib/env";
 import { fetchFsmeetUser } from "@/lib/fsmeet/users";
 import { getOptions, getPollByPublicId } from "@/lib/polls/repository";
-import { t } from "@/lib/i18n";
+import { getMessages } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +43,7 @@ export default async function EditPollPage({ params }: Ctx) {
       });
 
   const options = await getOptions(poll.id);
-  const messages = t();
+  const messages = await getMessages();
   const defaultMinAge = getVoiceMinAge();
 
   return (

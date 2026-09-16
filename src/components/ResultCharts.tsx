@@ -1,8 +1,9 @@
-import { formatCount, t } from "@/lib/i18n";
+import { formatCount } from "@/lib/i18n/catalog";
+import { getMessages } from "@/lib/i18n/server";
 
 type BarItem = { key: string; label: string; votes: number };
 
-export function ResultCharts({
+export async function ResultCharts({
   showDetails,
   totalVotes,
   options,
@@ -17,7 +18,7 @@ export function ResultCharts({
   byGender: BarItem[];
   byAge: BarItem[];
 }) {
-  const messages = t();
+  const messages = await getMessages();
 
   return (
     <section className="card space-y-6 p-5">

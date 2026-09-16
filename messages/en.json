@@ -2,7 +2,8 @@
   "app": {
     "name": "Voice",
     "tagline": "Community governance for freestyle football",
-    "poweredBy": "Community governance powered by FSMeet.com"
+    "poweredBy": "Community governance powered by FSMeet.com",
+    "officialBlurb": "Official freestyle football community governance within FSMeet."
   },
   "nav": {
     "polls": "Polls",
@@ -13,7 +14,10 @@
     "privacy": "Privacy",
     "otherTools": "Other tools",
     "login": "Log in",
-    "logout": "Log out"
+    "logout": "Log out",
+    "legal": "Legal",
+    "language": "Language",
+    "oauthNotConfigured": "OAuth not configured"
   },
   "home": {
     "sloganBefore": "your ",
@@ -121,5 +125,25 @@
     "gender": "Gender filter",
     "saveDraft": "Save draft",
     "create": "Create draft"
+  },
+  "faq": {
+    "whatIsTitle": "What is Voice?",
+    "whatIsBody": "Voice is the official community governance tool for freestyle football within FSMeet. It lets the scene create polls, discuss them, and vote so decisions are visible and shared. Outcomes are not enforced by the software — whether the community acts on a result is up to the community.",
+    "whoCreateTitle": "Who can create a poll?",
+    "whoCreateBody": "FSMeet users with type association, dj, freestyler, event_organizer, mc, or media — and a WFFA ID or a verified FSMeet account.",
+    "whoVoteTitle": "Who can vote?",
+    "whoVoteBody": "FSMeet users with type dj, freestyler, event_organizer, mc, or media. You must sign in with your FSMeet account, and have at least one of: WFFA ID, verified account, Instagram handle, TikTok handle, or YouTube handle on your FSMeet profile. If the poll sets age filters, you must meet them to vote.",
+    "whoCommentTitle": "Who can comment?",
+    "whoCommentBody": "Any signed-in FSMeet user type. If the poll sets age filters, you must meet them to comment — except the poll creator, who may always comment on their own poll regardless of audience filters.",
+    "abstentionTitle": "What is Abstention?",
+    "abstentionBody": "Abstention records that you participated without choosing an answer option. You cannot combine it with other options. It counts toward total votes and appears in result charts.",
+    "changeVoteTitle": "Can I change my vote?",
+    "changeVoteBody": "Yes, until the poll’s end date. After it expires, your answer is locked.",
+    "myVotesTitle": "What is My votes?",
+    "myVotesBody": "A personal list of every poll you took part in and the answer you gave (including abstentions)."
+  },
+  "tools": {
+    "freestyleActs": "FreestyleActs — Football Freestyler Bookings",
+    "fsmeet": "FSMeet — Event & Community Platform"
   }
 }

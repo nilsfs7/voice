@@ -8,7 +8,7 @@ import {
 } from "@/lib/capabilities";
 import { getVoiceMinAge } from "@/lib/env";
 import { fetchFsmeetUser } from "@/lib/fsmeet/users";
-import { t } from "@/lib/i18n";
+import { getMessages } from "@/lib/i18n";
 
 export default async function NewPollPage() {
   const user = await readSessionUser();
@@ -25,7 +25,7 @@ export default async function NewPollPage() {
         missing: ["verified account"],
       });
 
-  const messages = t();
+  const messages = await getMessages();
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">

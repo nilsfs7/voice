@@ -1,4 +1,5 @@
-import { formatCount, t } from "@/lib/i18n";
+import { formatCount } from "@/lib/i18n/catalog";
+import { getMessages } from "@/lib/i18n/server";
 
 type PollAudienceRulesProps = {
   countryCode?: string | null;
@@ -8,14 +9,14 @@ type PollAudienceRulesProps = {
   gender?: "male" | "female" | null;
 };
 
-export function PollAudienceRules({
+export async function PollAudienceRules({
   countryCode,
   continentalCode,
   minAge,
   maxAge,
   gender,
 }: PollAudienceRulesProps) {
-  const messages = t();
+  const messages = await getMessages();
   const rules: string[] = [];
 
   if (countryCode) {

@@ -1,15 +1,15 @@
-import { t } from "@/lib/i18n";
+import { getMessages } from "@/lib/i18n/server";
 
 const FSMEET_ACCOUNT = "https://fsmeet.com/account";
 
-export function ProfileGateNotice({
+export async function ProfileGateNotice({
   missing,
   purpose = "vote",
 }: {
   missing: string[];
   purpose?: "vote" | "create";
 }) {
-  const messages = t();
+  const messages = await getMessages();
   const template =
     purpose === "create"
       ? messages.poll.missingProfileCreate

@@ -4,7 +4,7 @@ import { HomeFilters } from "@/components/HomeFilters";
 import { displayName } from "@/lib/capabilities";
 import { voiceScript } from "@/lib/fonts";
 import { fetchFsmeetUsers } from "@/lib/fsmeet/users";
-import { formatCount, t } from "@/lib/i18n";
+import { formatCount, getMessages, getLocale } from "@/lib/i18n";
 import { readSessionUser } from "@/lib/auth/session";
 import { pollHref } from "@/lib/polls/alias";
 import { formatPollCardRemaining } from "@/lib/polls/remaining";
@@ -25,7 +25,8 @@ export default async function HomePage({
   searchParams: SearchParams;
 }) {
   const params = await searchParams;
-  const messages = t();
+  const messages = await getMessages();
+  const locale = await getLocale();
   const user = await readSessionUser();
   const sort =
     params.sort === "end_at" ||
@@ -174,7 +175,7 @@ export default async function HomePage({
                       })}
                     </span>
                     <span>Score {Number(poll.score ?? 0)}</span>
-                    <span>{formatPollCardRemaining(poll.end_at)}</span>
+                    <span>{formatPollCardRemaining(poll.end_at, messages, locale)}</span>
                   </div>
                 </Link>
               </div>

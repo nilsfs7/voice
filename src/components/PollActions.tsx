@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { t } from "@/lib/i18n";
+import { useMessages } from "@/components/I18nProvider";
 
 export function PollActions({
   publicId,
@@ -18,7 +18,7 @@ export function PollActions({
   canPublish?: boolean;
   canDelete?: boolean;
 }) {
-  const messages = t();
+  const messages = useMessages();
   const router = useRouter();
 
   async function publish() {
