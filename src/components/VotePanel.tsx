@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { t } from "@/lib/i18n";
+import { useMessages } from "@/components/I18nProvider";
 
 type Option = { id: number; label: string; description: string | null };
 
@@ -27,7 +27,7 @@ export function VotePanel({
   loggedIn: boolean;
   ageGate?: AgeGate;
 }) {
-  const messages = t();
+  const messages = useMessages();
   const router = useRouter();
   const [isAbstention, setIsAbstention] = useState(
     initial?.isAbstention ?? false,

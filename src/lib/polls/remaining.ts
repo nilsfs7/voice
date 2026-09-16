@@ -1,4 +1,5 @@
-import { formatCount, t } from "@/lib/i18n";
+import { formatCount, type Messages } from "@/lib/i18n/catalog";
+import type { Locale } from "@/lib/i18n/locales";
 
 function startOfLocalDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -7,9 +8,10 @@ function startOfLocalDay(date: Date): Date {
 /** Remaining time label for poll list cards (FR-PO-030). */
 export function formatPollCardRemaining(
   endAt: Date | string,
+  messages: Messages,
+  locale: Locale = "en",
   now: Date = new Date(),
 ): string {
-  const messages = t();
   const end = endAt instanceof Date ? endAt : new Date(endAt);
   if (Number.isNaN(end.getTime())) return messages.home.ended;
   if (end.getTime() <= now.getTime()) return messages.home.ended;
@@ -20,7 +22,7 @@ export function formatPollCardRemaining(
   );
 
   if (daysLeft <= 0) {
-    const time = end.toLocaleTimeString("en-GB", {
+    const time = end.toLocaleTimeString(locale, {
       hour: "2-digit",
       minute: "2-digit",
     });

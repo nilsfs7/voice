@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { readSessionUser } from "@/lib/auth/session";
-import { t } from "@/lib/i18n";
+import { getMessages } from "@/lib/i18n";
 import { pollHref } from "@/lib/polls/alias";
 import { listBallotsForUser } from "@/lib/polls/ballots";
 
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function MyVotesPage() {
   const user = await readSessionUser();
   if (!user) redirect("/api/auth/fsmeet/start?returnTo=/my-votes");
-  const messages = t();
+  const messages = await getMessages();
 
   let rows: Awaited<ReturnType<typeof listBallotsForUser>> = [];
   try {

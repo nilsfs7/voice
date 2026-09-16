@@ -2,7 +2,8 @@
 
 import { FsmeetProfileTrigger } from "@/components/FsmeetProfileTrigger";
 import { displayName } from "@/lib/capabilities";
-import { formatCount, t } from "@/lib/i18n";
+import { useMessages } from "@/components/I18nProvider";
+import { formatCount } from "@/lib/i18n/catalog";
 
 type RosterEntry = {
   voterUsername: string;
@@ -54,7 +55,7 @@ export function CreatorBallotRoster({
   publicId: string;
   entries: RosterEntry[];
 }) {
-  const messages = t();
+  const messages = useMessages();
 
   function downloadCsv() {
     const csv = buildCsv(entries, messages.poll.abstention);

@@ -11,7 +11,7 @@ import { canCreatePoll, canScore, canVote, checkVotePresenceGate, displayName, i
 import { getFsmeetAccessToken, readSessionUser } from '@/lib/auth/session';
 import { getSiteUrl } from '@/lib/env';
 import { fetchFsmeetUser, fetchFsmeetUsers } from '@/lib/fsmeet/users';
-import { formatCount, t } from '@/lib/i18n';
+import { formatCount, getMessages } from "@/lib/i18n";
 import { getAbstentionCount, getBallot, getDemographicBallots, getOptionCounts, listNamedBallotsForPoll } from '@/lib/polls/ballots';
 import { listComments, upsertPollScore } from '@/lib/polls/comments';
 import { getOptions, getPollByPublicId } from '@/lib/polls/repository';
@@ -24,7 +24,7 @@ type Ctx = { params: Promise<{ publicId: string }> };
 
 export default async function PollPage({ params }: Ctx) {
   const { publicId } = await params;
-  const messages = t();
+  const messages = await getMessages();
   const user = await readSessionUser();
 
   let poll;

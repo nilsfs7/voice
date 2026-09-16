@@ -274,6 +274,7 @@ Status legend: `proposed` · `accepted` · `deferred` · `rejected`
 | FR-UI-009  | Clicking a user’s **profile picture** or **name** opens a confirm popup: “View on FSMeet?” with **No** / **Yes**; **Yes** navigates to that user’s FSMeet profile | must     | accepted | Applies wherever identity is shown (poll cards, poll detail, comments, header). Profile URL: `{FSMEET_FRONTEND}/users/{username}` |
 | FR-UI-010  | Poll detail has a **clearly visible Share** control that **copies the poll’s public URL to the clipboard** so others can open it and vote                         | must     | accepted | Prefer the alias URL when set (FR-PO-028); brief confirmation feedback after copy (e.g. “Copied”)                                 |
 | FR-UI-011  | **Association** accounts are **visually highlighted** wherever identity is shown so they clearly stand out from other user types                                  | must     | accepted | Poll cards, poll detail, comments, header; e.g. badge + distinct avatar treatment; stay within §7 (no neon/crypto)                |
+| FR-UI-012  | Users can switch UI language among EN, FR, ES, DE, JP, MY, IN, CN, SA (mapped to `en` `fr` `es` `de` `ja` `ms` `hi` `zh` `ar`)                                     | must     | accepted | NFR-04; switcher in header/footer; choice persisted; `html` `lang` + `dir` (RTL for Arabic); Imprint stays English (FR-UI-002)    |
 
 #### 6.5.1 Imprint content (canonical)
 
@@ -497,7 +498,7 @@ Define CSS variables; exact hex may be tuned in implementation.
 | NFR-01 | Mobile-friendly UX                                                           | must     | proposed | Community often on phones                    |
 | NFR-02 | Align with FSMeet environment URLs for prod / dev / local                    | must     | accepted | §2.1                                         |
 | NFR-03 | Vote and ranking integrity for community-scale usage                         | must     | accepted | No double ballot; changeable until expiry    |
-| NFR-04 | UI is **i18n-ready** with **English only** in v1; additional languages later | must     | accepted | Do not hard-code copy outside the i18n layer |
+| NFR-04 | UI supports **locales** EN, FR, ES, DE, JA, MS, HI, ZH, AR (product codes EN/FR/ES/DE/JP/MY/IN/CN/SA); default **EN**; language switcher in chrome | must     | accepted | BCP-47: `en` `fr` `es` `de` `ja` `ms` `hi` `zh` `ar`. Persist choice (cookie). Arabic is RTL. Copy via i18n message files — do not hard-code UI strings. Imprint remains EN-only for now (FR-UI-002); Privacy/FAQ follow UI locale |
 | NFR-05 | UI follows §7 design system                                                  | must     | accepted |                                              |
 | NFR-06 | Voting UX conveys that the user’s vote is taken seriously                    | must     | accepted |                                              |
 
@@ -614,6 +615,7 @@ Define CSS variables; exact hex may be tuned in implementation.
 | 2026-09-16 | Create-poll trust gate (wffaId or verified) + vote presence gate (wffaId / verified / social handles) — §4.2, FR-PO-009b, FR-VO-012                                   | agent + user (DE input) |
 | 2026-09-16 | Voice admin username `fsmeet` may soft-delete any poll or comment — U-07, FR-AD-001                                                                                  | agent + user (DE input) |
 | 2026-09-16 | Poll list sortable by highest participation (votes) — FR-PO-010                                                                                                      | agent + user (DE input) |
+| 2026-09-16 | Multi-locale UI: EN/FR/ES/DE/JP/MY/IN/CN/SA (`en` `fr` `es` `de` `ja` `ms` `hi` `zh` `ar`) — NFR-04, FR-UI-012                                                     | agent + user            |
 
 ---
 

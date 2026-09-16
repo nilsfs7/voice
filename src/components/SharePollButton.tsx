@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { t } from "@/lib/i18n";
+import { useMessages } from "@/components/I18nProvider";
 
 export function SharePollButton({ url }: { url: string }) {
-  const messages = t();
+  const messages = useMessages();
   const [copied, setCopied] = useState(false);
 
   async function copy() {

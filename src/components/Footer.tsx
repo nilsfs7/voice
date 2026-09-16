@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { FaGithub, FaInstagram } from "react-icons/fa";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { getFsmeetFrontendUrl } from "@/lib/env";
-import type { Messages } from "@/lib/i18n";
+import type { Messages } from "@/lib/i18n/catalog";
 
 export function Footer({ messages }: { messages: Messages }) {
   const fsmeet = getFsmeetFrontendUrl();
@@ -19,6 +20,7 @@ export function Footer({ messages }: { messages: Messages }) {
             {messages.app.poweredBy}
           </Link>
           <div className="flex items-center gap-4 text-text-muted">
+            <LanguageSwitcher />
             <a
               href="https://www.instagram.com/fsmeet_com"
               target="_blank"
@@ -51,7 +53,7 @@ export function Footer({ messages }: { messages: Messages }) {
                   rel="noreferrer"
                   className="hover:text-text"
                 >
-                  FreestyleActs — Football Freestyler Bookings
+                  {messages.tools.freestyleActs}
                 </a>
               </li>
               <li>
@@ -61,13 +63,13 @@ export function Footer({ messages }: { messages: Messages }) {
                   rel="noreferrer"
                   className="hover:text-text"
                 >
-                  FSMeet — Event & Community Platform
+                  {messages.tools.fsmeet}
                 </a>
               </li>
             </ul>
           </div>
           <div>
-            <div className="mb-2 font-semibold">Legal</div>
+            <div className="mb-2 font-semibold">{messages.nav.legal}</div>
             <ul className="space-y-2 text-text-muted">
               <li>
                 <Link href="/faq" className="hover:text-text">
@@ -86,9 +88,7 @@ export function Footer({ messages }: { messages: Messages }) {
               </li>
             </ul>
           </div>
-          <div className="text-text-muted">
-            Official freestyle football community governance within FSMeet.
-          </div>
+          <div className="text-text-muted">{messages.app.officialBlurb}</div>
         </div>
       </div>
     </footer>

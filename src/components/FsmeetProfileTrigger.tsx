@@ -10,7 +10,7 @@ import {
 } from "react";
 import type { UserType } from "@/lib/capabilities";
 import { fsmeetProfileUrl } from "@/lib/fsmeet/urls";
-import { t } from "@/lib/i18n";
+import { useMessages } from "@/components/I18nProvider";
 
 export function FsmeetProfileTrigger({
   username,
@@ -23,7 +23,7 @@ export function FsmeetProfileTrigger({
   children: ReactNode;
   className?: string;
 }) {
-  const messages = t();
+  const messages = useMessages();
   const titleId = useId();
   const [open, setOpen] = useState(false);
   const yesRef = useRef<HTMLButtonElement>(null);
