@@ -90,7 +90,12 @@
     "ballotRosterSummary": "{count} 票",
     "ballotRosterHint": "作成者のあなただけに表示 — 各参加者とその回答。",
     "ballotRosterEmpty": "まだ投票はありません。",
-    "ballotRosterDownloadCsv": "CSVをダウンロード"
+    "ballotRosterDownloadCsv": "CSVをダウンロード",
+    "ballotRosterAccountAgeDay": "作成から1日",
+    "ballotRosterAccountAgeDays": "作成から{count}日",
+    "ballotRosterAccountAgeYear": "作成から1年",
+    "ballotRosterAccountAgeYears": "作成から{count}年",
+    "ballotRosterAccountNewerThanPoll": "投票より新しいアカウント"
   },
   "comments": {
     "title": "ディスカッション",

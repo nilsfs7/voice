@@ -90,7 +90,12 @@
     "ballotRosterSummary": "{count} papeletas",
     "ballotRosterHint": "Visible solo para ti como creador — cada participante y su respuesta.",
     "ballotRosterEmpty": "Aún no hay papeletas.",
-    "ballotRosterDownloadCsv": "Descargar CSV"
+    "ballotRosterDownloadCsv": "Descargar CSV",
+    "ballotRosterAccountAgeDay": "1 día de antigüedad",
+    "ballotRosterAccountAgeDays": "{count} días de antigüedad",
+    "ballotRosterAccountAgeYear": "1 año de antigüedad",
+    "ballotRosterAccountAgeYears": "{count} años de antigüedad",
+    "ballotRosterAccountNewerThanPoll": "Más nuevo que la encuesta"
   },
   "comments": {
     "title": "Discusión",

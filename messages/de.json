@@ -90,7 +90,12 @@
     "ballotRosterSummary": "{count} Stimmen",
     "ballotRosterHint": "Nur für dich als Ersteller sichtbar — jeder Teilnehmer und seine Antwort.",
     "ballotRosterEmpty": "Noch keine Stimmen.",
-    "ballotRosterDownloadCsv": "CSV herunterladen"
+    "ballotRosterDownloadCsv": "CSV herunterladen",
+    "ballotRosterAccountAgeDay": "1 Tag alt",
+    "ballotRosterAccountAgeDays": "{count} Tage alt",
+    "ballotRosterAccountAgeYear": "1 Jahr alt",
+    "ballotRosterAccountAgeYears": "{count} Jahre alt",
+    "ballotRosterAccountNewerThanPoll": "Neuer als die Umfrage"
   },
   "comments": {
     "title": "Diskussion",

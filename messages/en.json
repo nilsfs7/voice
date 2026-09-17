@@ -90,7 +90,12 @@
     "ballotRosterSummary": "{count} ballots",
     "ballotRosterHint": "Visible only to you as the poll creator — each participant and their answer.",
     "ballotRosterEmpty": "No ballots yet.",
-    "ballotRosterDownloadCsv": "Download CSV"
+    "ballotRosterDownloadCsv": "Download CSV",
+    "ballotRosterAccountAgeDay": "1 day old",
+    "ballotRosterAccountAgeDays": "{count} days old",
+    "ballotRosterAccountAgeYear": "1 year old",
+    "ballotRosterAccountAgeYears": "{count} years old",
+    "ballotRosterAccountNewerThanPoll": "Newer than poll"
   },
   "comments": {
     "title": "Discussion",

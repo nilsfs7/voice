@@ -1,9 +1,14 @@
 "use client";
 
 import { FsmeetProfileTrigger } from "@/components/FsmeetProfileTrigger";
+import { useI18n } from "@/components/I18nProvider";
 import { displayName } from "@/lib/capabilities";
-import { useMessages } from "@/components/I18nProvider";
-import { formatCount } from "@/lib/i18n/catalog";
+import {
+  accountAgeSince,
+  isAccountNewerThanPoll,
+  parseJoined,
+} from "@/lib/fsmeet/account-age";
+import { formatCount, type Messages } from "@/lib/i18n/catalog";
 
 type RosterEntry = {
   voterUsername: string;
@@ -15,6 +20,7 @@ type RosterEntry = {
     lastName: string;
     imageUrl: string;
     type?: string;
+    joined?: string | null;
   };
 };
 
@@ -25,24 +31,57 @@ function csvEscape(value: string): string {
   return value;
 }
 
+function formatAccountAgeLabel(
+  joined: Date,
+  messages: Messages,
+  now: Date,
+): string {
+  const age = accountAgeSince(joined, now);
+  if (age.unit === "days") {
+    if (age.count === 1) return messages.poll.ballotRosterAccountAgeDay;
+    return formatCount(messages.poll.ballotRosterAccountAgeDays, {
+      count: age.count,
+    });
+  }
+  if (age.count === 1) return messages.poll.ballotRosterAccountAgeYear;
+  return formatCount(messages.poll.ballotRosterAccountAgeYears, {
+    count: age.count,
+  });
+}
+
 function buildCsv(
   entries: RosterEntry[],
   abstentionLabel: string,
+  pollCreatedAt: string,
 ): string {
+  const pollCreated = parseJoined(pollCreatedAt);
   const header = [
     "username",
     "first_name",
     "last_name",
     "answer",
     "updated_at",
+    "account_joined",
+    "account_newer_than_poll",
   ];
-  const rows = entries.map((entry) => [
-    entry.voterUsername,
-    entry.voter?.firstName ?? "",
-    entry.voter?.lastName ?? "",
-    entry.isAbstention ? abstentionLabel : entry.optionLabels || "",
-    entry.updatedAt,
-  ]);
+  const rows = entries.map((entry) => {
+    const joined = parseJoined(entry.voter?.joined);
+    const newer =
+      joined && pollCreated
+        ? isAccountNewerThanPoll(joined, pollCreated)
+          ? "yes"
+          : "no"
+        : "";
+    return [
+      entry.voterUsername,
+      entry.voter?.firstName ?? "",
+      entry.voter?.lastName ?? "",
+      entry.isAbstention ? abstentionLabel : entry.optionLabels || "",
+      entry.updatedAt,
+      joined ? joined.toISOString() : "",
+      newer,
+    ];
+  });
   return [header, ...rows]
     .map((row) => row.map((cell) => csvEscape(String(cell))).join(","))
     .join("\n");
@@ -50,15 +89,20 @@ function buildCsv(
 
 export function CreatorBallotRoster({
   publicId,
+  pollCreatedAt,
   entries,
 }: {
   publicId: string;
+  /** Poll `created_at` ISO string — used to flag accounts newer than the poll. */
+  pollCreatedAt: string;
   entries: RosterEntry[];
 }) {
-  const messages = useMessages();
+  const { messages, locale } = useI18n();
+  const pollCreated = parseJoined(pollCreatedAt);
+  const now = new Date();
 
   function downloadCsv() {
-    const csv = buildCsv(entries, messages.poll.abstention);
+    const csv = buildCsv(entries, messages.poll.abstention, pollCreatedAt);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
@@ -111,39 +155,69 @@ export function CreatorBallotRoster({
             </p>
           ) : (
             <ul className="divide-y divide-border">
-              {entries.map((entry) => (
-                <li
-                  key={entry.voterUsername}
-                  className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <FsmeetProfileTrigger
-                    username={entry.voterUsername}
-                    userType={entry.voter?.type}
+              {entries.map((entry) => {
+                const joined = parseJoined(entry.voter?.joined);
+                const newerThanPoll = Boolean(
+                  joined &&
+                    pollCreated &&
+                    isAccountNewerThanPoll(joined, pollCreated),
+                );
+                const ageLabel = joined
+                  ? formatAccountAgeLabel(joined, messages, now)
+                  : null;
+
+                return (
+                  <li
+                    key={entry.voterUsername}
+                    className={`flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between${
+                      newerThanPoll ? " roster-row-newer" : ""
+                    }`}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={entry.voter?.imageUrl || "/avatar-fallback.svg"}
-                      alt=""
-                      className="h-8 w-8 rounded-full object-cover"
-                    />
-                    <span className="fsmeet-profile-name font-medium text-text">
-                      {entry.voter
-                        ? displayName(entry.voter)
-                        : entry.voterUsername}
-                    </span>
-                  </FsmeetProfileTrigger>
-                  <div className="sm:text-right">
-                    <p className="text-sm text-text">
-                      {entry.isAbstention
-                        ? messages.poll.abstention
-                        : entry.optionLabels || "—"}
-                    </p>
-                    <p className="text-xs text-text-muted">
-                      {new Date(entry.updatedAt).toLocaleString("en-GB")}
-                    </p>
-                  </div>
-                </li>
-              ))}
+                    <div className="min-w-0 space-y-1">
+                      <FsmeetProfileTrigger
+                        username={entry.voterUsername}
+                        userType={entry.voter?.type}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={entry.voter?.imageUrl || "/avatar-fallback.svg"}
+                          alt=""
+                          className="h-8 w-8 rounded-full object-cover"
+                        />
+                        <span className="fsmeet-profile-name font-medium text-text">
+                          {entry.voter
+                            ? displayName(entry.voter)
+                            : entry.voterUsername}
+                        </span>
+                      </FsmeetProfileTrigger>
+                      {ageLabel ? (
+                        <p
+                          className={`text-xs ${
+                            newerThanPoll
+                              ? "font-medium text-danger"
+                              : "text-text-muted"
+                          }`}
+                        >
+                          {ageLabel}
+                          {newerThanPoll
+                            ? ` · ${messages.poll.ballotRosterAccountNewerThanPoll}`
+                            : ""}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="sm:text-right">
+                      <p className="text-sm text-text">
+                        {entry.isAbstention
+                          ? messages.poll.abstention
+                          : entry.optionLabels || "—"}
+                      </p>
+                      <p className="text-xs text-text-muted">
+                        {new Date(entry.updatedAt).toLocaleString(locale)}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

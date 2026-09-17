@@ -405,3 +405,15 @@ select {
   letter-spacing: 0.01em;
   line-height: 0.95;
 }
+
+.roster-row-newer {
+  margin-inline: -0.5rem;
+  padding-inline: 0.5rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-danger) 6%, var(--color-surface));
+  box-shadow: inset 3px 0 0 var(--color-danger);
+}
+
+[dir="rtl"] .roster-row-newer {
+  box-shadow: inset -3px 0 0 var(--color-danger);
+}

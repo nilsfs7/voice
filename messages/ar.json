@@ -90,7 +90,12 @@
     "ballotRosterSummary": "{count} بطاقة اقتراع",
     "ballotRosterHint": "مرئي لك فقط كمنشئ — كل مشارك وإجابته.",
     "ballotRosterEmpty": "لا بطاقات اقتراع بعد.",
-    "ballotRosterDownloadCsv": "تنزيل CSV"
+    "ballotRosterDownloadCsv": "تنزيل CSV",
+    "ballotRosterAccountAgeDay": "عمر الحساب يوم واحد",
+    "ballotRosterAccountAgeDays": "عمر الحساب {count} يومًا",
+    "ballotRosterAccountAgeYear": "عمر الحساب سنة واحدة",
+    "ballotRosterAccountAgeYears": "عمر الحساب {count} سنوات",
+    "ballotRosterAccountNewerThanPoll": "أحدث من الاستطلاع"
   },
   "comments": {
     "title": "نقاش",
