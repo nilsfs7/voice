@@ -90,7 +90,12 @@
     "ballotRosterSummary": "{count} 张选票",
     "ballotRosterHint": "仅创建者可见 — 每位参与者及其答案。",
     "ballotRosterEmpty": "尚无选票。",
-    "ballotRosterDownloadCsv": "下载 CSV"
+    "ballotRosterDownloadCsv": "下载 CSV",
+    "ballotRosterAccountAgeDay": "已注册 1 天",
+    "ballotRosterAccountAgeDays": "已注册 {count} 天",
+    "ballotRosterAccountAgeYear": "已注册 1 年",
+    "ballotRosterAccountAgeYears": "已注册 {count} 年",
+    "ballotRosterAccountNewerThanPoll": "账户晚于投票创建"
   },
   "comments": {
     "title": "讨论",

@@ -30,6 +30,8 @@ export type FsmeetUser = {
   instagramHandle?: string | null;
   tikTokHandle?: string | null;
   youTubeHandle?: string | null;
+  /** FSMeet account creation datetime (ISO / parseable). */
+  joined?: string | null;
 };
 
 const CREATE_TYPES = new Set<UserType>([

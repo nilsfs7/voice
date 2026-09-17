@@ -53,6 +53,14 @@ export function mapFsmeetUser(raw: Record<string, unknown>): FsmeetUser {
     instagramHandle: optionalString(raw.instagramHandle),
     tikTokHandle: optionalString(raw.tikTokHandle),
     youTubeHandle: optionalString(raw.youTubeHandle),
+    joined:
+      typeof raw.joined === "string" && raw.joined.trim()
+        ? raw.joined.trim()
+        : raw.joined instanceof Date
+          ? raw.joined.toISOString()
+          : typeof raw.joined === "number"
+            ? new Date(raw.joined).toISOString()
+            : null,
   };
 }
 

@@ -90,7 +90,12 @@
     "ballotRosterSummary": "{count} मतपत्र",
     "ballotRosterHint": "केवल निर्माता के रूप में आपको दिखता है — प्रत्येक प्रतिभागी और उनका उत्तर।",
     "ballotRosterEmpty": "अभी कोई मतपत्र नहीं।",
-    "ballotRosterDownloadCsv": "CSV डाउनलोड करें"
+    "ballotRosterDownloadCsv": "CSV डाउनलोड करें",
+    "ballotRosterAccountAgeDay": "1 दिन पुराना",
+    "ballotRosterAccountAgeDays": "{count} दिन पुराना",
+    "ballotRosterAccountAgeYear": "1 वर्ष पुराना",
+    "ballotRosterAccountAgeYears": "{count} वर्ष पुराना",
+    "ballotRosterAccountNewerThanPoll": "मतदान से नया खाता"
   },
   "comments": {
     "title": "चर्चा",

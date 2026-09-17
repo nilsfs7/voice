@@ -133,6 +133,7 @@ export default async function PollPage({ params }: Ctx) {
       lastName: string;
       imageUrl: string;
       type?: string;
+      joined?: string | null;
     };
   }[] = [];
   if (isCreator && poll.status === 'published') {
@@ -151,6 +152,7 @@ export default async function PollPage({ params }: Ctx) {
               lastName: voter.lastName,
               imageUrl: voter.imageUrl,
               type: voter.type,
+              joined: voter.joined ?? null,
             }
           : undefined,
       };
@@ -228,7 +230,13 @@ export default async function PollPage({ params }: Ctx) {
 
       <ResultCharts showDetails={showDetails} totalVotes={totalVotes} options={optionVotes} abstentions={abstentions} byGender={byGender} byAge={byAge} />
 
-      {isCreator && poll.status === 'published' ? <CreatorBallotRoster publicId={poll.alias || poll.public_id} entries={rosterEntries} /> : null}
+      {isCreator && poll.status === 'published' ? (
+        <CreatorBallotRoster
+          publicId={poll.alias || poll.public_id}
+          pollCreatedAt={new Date(poll.created_at).toISOString()}
+          entries={rosterEntries}
+        />
+      ) : null}
 
       {poll.status === 'published' ? (
         <CommentsSection

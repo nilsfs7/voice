@@ -90,7 +90,12 @@
     "ballotRosterSummary": "{count} bulletins",
     "ballotRosterHint": "Visible uniquement pour vous en tant que créateur — chaque participant et sa réponse.",
     "ballotRosterEmpty": "Aucun bulletin pour le moment.",
-    "ballotRosterDownloadCsv": "Télécharger CSV"
+    "ballotRosterDownloadCsv": "Télécharger CSV",
+    "ballotRosterAccountAgeDay": "1 jour",
+    "ballotRosterAccountAgeDays": "{count} jours",
+    "ballotRosterAccountAgeYear": "1 an",
+    "ballotRosterAccountAgeYears": "{count} ans",
+    "ballotRosterAccountNewerThanPoll": "Plus récent que le sondage"
   },
   "comments": {
     "title": "Discussion",

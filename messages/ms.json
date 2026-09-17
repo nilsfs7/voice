@@ -90,7 +90,12 @@
     "ballotRosterSummary": "{count} undi",
     "ballotRosterHint": "Hanya kelihatan kepada anda sebagai pencipta — setiap peserta dan jawapan mereka.",
     "ballotRosterEmpty": "Belum ada undi.",
-    "ballotRosterDownloadCsv": "Muat turun CSV"
+    "ballotRosterDownloadCsv": "Muat turun CSV",
+    "ballotRosterAccountAgeDay": "1 hari",
+    "ballotRosterAccountAgeDays": "{count} hari",
+    "ballotRosterAccountAgeYear": "1 tahun",
+    "ballotRosterAccountAgeYears": "{count} tahun",
+    "ballotRosterAccountNewerThanPoll": "Lebih baharu daripada undian"
   },
   "comments": {
     "title": "Perbincangan",
