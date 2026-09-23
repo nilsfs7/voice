@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { PollForm } from "@/components/PollForm";
 import { ProfileGateNotice } from "@/components/ProfileGateNotice";
@@ -10,8 +11,13 @@ import { getVoiceMinAge } from "@/lib/env";
 import { fetchFsmeetUser } from "@/lib/fsmeet/users";
 import { getOptions, getPollByPublicId } from "@/lib/polls/repository";
 import { getMessages } from "@/lib/i18n";
+import { NOINDEX_ROBOTS } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  robots: NOINDEX_ROBOTS,
+};
 
 type Ctx = { params: Promise<{ publicId: string }> };
 

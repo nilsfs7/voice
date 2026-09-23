@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { ProfileGateNotice } from "@/components/ProfileGateNotice";
 import { PollForm } from "@/components/PollForm";
@@ -9,6 +10,11 @@ import {
 import { getVoiceMinAge } from "@/lib/env";
 import { fetchFsmeetUser } from "@/lib/fsmeet/users";
 import { getMessages } from "@/lib/i18n";
+import { NOINDEX_ROBOTS } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = {
+  robots: NOINDEX_ROBOTS,
+};
 
 export default async function NewPollPage() {
   const user = await readSessionUser();

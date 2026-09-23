@@ -1,25 +1,20 @@
+import { JsonLd } from "@/components/JsonLd";
 import { getMessages } from "@/lib/i18n";
+import { faqItems, faqPageJsonLd } from "@/lib/seo/json-ld";
 
 export const metadata = { title: "FAQ" };
 
 export default async function FaqPage() {
   const messages = await getMessages();
-  const items = [
-    { title: messages.faq.whatIsTitle, body: messages.faq.whatIsBody },
-    { title: messages.faq.whoCreateTitle, body: messages.faq.whoCreateBody },
-    { title: messages.faq.whoVoteTitle, body: messages.faq.whoVoteBody },
-    { title: messages.faq.whoCommentTitle, body: messages.faq.whoCommentBody },
-    { title: messages.faq.abstentionTitle, body: messages.faq.abstentionBody },
-    { title: messages.faq.changeVoteTitle, body: messages.faq.changeVoteBody },
-    { title: messages.faq.myVotesTitle, body: messages.faq.myVotesBody },
-  ];
+  const items = faqItems(messages);
 
   return (
     <article className="prose-voice mx-auto max-w-3xl space-y-8">
+      <JsonLd data={faqPageJsonLd(items)} />
       <h1 className="display text-4xl font-semibold">{messages.nav.faq}</h1>
       {items.map((item) => (
-        <FaqItem key={item.title} title={item.title}>
-          {item.body}
+        <FaqItem key={item.question} title={item.question}>
+          {item.answer}
         </FaqItem>
       ))}
     </article>

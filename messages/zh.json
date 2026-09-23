@@ -50,6 +50,7 @@
   },
   "poll": {
     "abstention": "弃权",
+    "metaDescriptionFallback": "Voice 社区投票 · FSMeet",
     "abstentionHint": "不选择选项也计入参与。",
     "submitVote": "提交投票",
     "updateVote": "更新投票",

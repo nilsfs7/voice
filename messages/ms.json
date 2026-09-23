@@ -50,6 +50,7 @@
   },
   "poll": {
     "abstention": "Berkecuali",
+    "metaDescriptionFallback": "Undian komuniti di Voice · FSMeet",
     "abstentionHint": "Kira penyertaan anda tanpa memilih pilihan.",
     "submitVote": "Hantar undi",
     "updateVote": "Kemas kini undi",

@@ -50,6 +50,7 @@
   },
   "poll": {
     "abstention": "棄権",
+    "metaDescriptionFallback": "Voice でのコミュニティ投票 · FSMeet",
     "abstentionHint": "選択肢を選ばずに参加を記録します。",
     "submitVote": "投票する",
     "updateVote": "投票を更新",

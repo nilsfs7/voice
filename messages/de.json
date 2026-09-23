@@ -50,6 +50,7 @@
   },
   "poll": {
     "abstention": "Enthaltung",
+    "metaDescriptionFallback": "Community-Abstimmung auf Voice · FSMeet",
     "abstentionHint": "Teilnahme zählen, ohne eine Option zu wählen.",
     "submitVote": "Stimme abgeben",
     "updateVote": "Stimme ändern",

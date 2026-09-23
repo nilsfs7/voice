@@ -50,6 +50,7 @@
   },
   "poll": {
     "abstention": "Abstención",
+    "metaDescriptionFallback": "Voto comunitario en Voice · FSMeet",
     "abstentionHint": "Cuenta tu participación sin elegir una opción.",
     "submitVote": "Enviar voto",
     "updateVote": "Actualizar voto",

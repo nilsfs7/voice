@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FsmeetProfileTrigger } from "@/components/FsmeetProfileTrigger";
 import { HomeFilters } from "@/components/HomeFilters";
+import { JsonLd } from "@/components/JsonLd";
 import { displayName } from "@/lib/capabilities";
 import { voiceScript } from "@/lib/fonts";
 import { fetchFsmeetUsers } from "@/lib/fsmeet/users";
@@ -9,6 +10,7 @@ import { readSessionUser } from "@/lib/auth/session";
 import { pollHref } from "@/lib/polls/alias";
 import { formatPollCardRemaining } from "@/lib/polls/remaining";
 import { listPollCreatorUsernames, listPolls } from "@/lib/polls/repository";
+import { websiteOrganizationGraph } from "@/lib/seo/json-ld";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +78,12 @@ export default async function HomePage({
 
   return (
     <div className="space-y-10">
+      <JsonLd
+        data={websiteOrganizationGraph({
+          name: messages.app.name,
+          description: messages.app.tagline,
+        })}
+      />
       <section className="mx-auto max-w-2xl space-y-4 text-center">
         <h1 className="text-4xl leading-tight font-medium tracking-tight text-text sm:text-5xl">
           <span className="block">
