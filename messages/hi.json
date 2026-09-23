@@ -50,6 +50,7 @@
   },
   "poll": {
     "abstention": "परहेज़",
+    "metaDescriptionFallback": "Voice पर सामुदायिक मत · FSMeet",
     "abstentionHint": "विकल्प चुने बिना अपनी भागीदारी गिनें।",
     "submitVote": "वोट जमा करें",
     "updateVote": "वोट अपडेट करें",

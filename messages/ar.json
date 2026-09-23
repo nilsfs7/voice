@@ -50,6 +50,7 @@
   },
   "poll": {
     "abstention": "امتناع",
+    "metaDescriptionFallback": "تصويت مجتمعي على Voice · FSMeet",
     "abstentionHint": "احسب مشاركتك دون اختيار خيار.",
     "submitVote": "إرسال التصويت",
     "updateVote": "تحديث التصويت",

@@ -1,11 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { readSessionUser } from "@/lib/auth/session";
 import { getMessages } from "@/lib/i18n";
 import { pollHref } from "@/lib/polls/alias";
 import { listBallotsForUser } from "@/lib/polls/ballots";
+import { NOINDEX_ROBOTS } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  robots: NOINDEX_ROBOTS,
+};
 
 export default async function MyVotesPage() {
   const user = await readSessionUser();

@@ -1,7 +1,9 @@
+import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { CommentsSection } from '@/components/CommentsSection';
 import { CreatorBallotRoster } from '@/components/CreatorBallotRoster';
 import { FsmeetProfileTrigger } from '@/components/FsmeetProfileTrigger';
+import { JsonLd } from '@/components/JsonLd';
 import { PollActions } from '@/components/PollActions';
 import { PollAudienceRules } from '@/components/PollAudienceRules';
 import { ResultCharts } from '@/components/ResultCharts';
@@ -9,18 +11,70 @@ import { SharePollButton } from '@/components/SharePollButton';
 import { VotePanel } from '@/components/VotePanel';
 import { canCreatePoll, canScore, canVote, checkVotePresenceGate, displayName, isVoiceAdmin } from '@/lib/capabilities';
 import { getFsmeetAccessToken, readSessionUser } from '@/lib/auth/session';
-import { getSiteUrl } from '@/lib/env';
 import { fetchFsmeetUser, fetchFsmeetUsers } from '@/lib/fsmeet/users';
+import { fsmeetProfileUrl } from '@/lib/fsmeet/urls';
 import { formatCount, getMessages } from "@/lib/i18n";
 import { getAbstentionCount, getBallot, getDemographicBallots, getOptionCounts, listNamedBallotsForPoll } from '@/lib/polls/ballots';
 import { listComments, upsertPollScore } from '@/lib/polls/comments';
 import { getOptions, getPollByPublicId } from '@/lib/polls/repository';
 import { pollHref } from '@/lib/polls/alias';
 import { AGE_BUCKETS, ageBucketId, checkPollAgeEligibility, pollIsOpen, resultsVisible } from '@/lib/polls/rules';
+import { pollQuestionJsonLd } from '@/lib/seo/json-ld';
+import {
+  NOINDEX_ROBOTS,
+  pollCanonical,
+  truncateDescription,
+} from '@/lib/seo/metadata';
 
 export const dynamic = 'force-dynamic';
 
 type Ctx = { params: Promise<{ publicId: string }> };
+
+/** Published poll metadata + draft noindex (TECH-17 / TECH-18). */
+export async function generateMetadata({ params }: Ctx): Promise<Metadata> {
+  const { publicId } = await params;
+  const messages = await getMessages();
+
+  try {
+    const poll = await getPollByPublicId(publicId);
+    if (!poll || poll.deleted_at) {
+      return { robots: NOINDEX_ROBOTS };
+    }
+
+    const title = poll.question.trim() || messages.app.name;
+
+    if (poll.status === 'draft') {
+      return {
+        title,
+        robots: NOINDEX_ROBOTS,
+      };
+    }
+
+    const description =
+      truncateDescription(poll.description) ||
+      messages.poll.metaDescriptionFallback;
+    const canonical = pollCanonical(poll);
+
+    return {
+      title,
+      description,
+      alternates: { canonical },
+      openGraph: {
+        type: 'website',
+        title,
+        description,
+        url: canonical,
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+      },
+    };
+  } catch {
+    return { robots: NOINDEX_ROBOTS };
+  }
+}
 
 export default async function PollPage({ params }: Ctx) {
   const { publicId } = await params;
@@ -121,7 +175,7 @@ export default async function PollPage({ params }: Ctx) {
   const userCanScore = Boolean(user && canScore(user.type) && ageGate.ok);
   const isCreator = user?.username === poll.creator_username;
   const isAdmin = isVoiceAdmin(user?.username);
-  const shareUrl = `${getSiteUrl()}${pollHref(poll)}`;
+  const shareUrl = pollCanonical(poll);
 
   let rosterEntries: {
     voterUsername: string;
@@ -160,7 +214,20 @@ export default async function PollPage({ params }: Ctx) {
   }
 
   return (
-    <div className="space-y-8">
+    <article className="space-y-8">
+      {poll.status === 'published' ? (
+        <JsonLd
+          data={pollQuestionJsonLd({
+            name: poll.question.trim(),
+            text: poll.description,
+            url: shareUrl,
+            dateCreated: poll.created_at,
+            dateModified: poll.updated_at,
+            authorName: creator ? displayName(creator) : poll.creator_username,
+            authorUrl: fsmeetProfileUrl(poll.creator_username),
+          })}
+        />
+      ) : null}
       <div className="space-y-4">
         <div className="flex items-center gap-3 text-sm text-text-muted">
           <FsmeetProfileTrigger username={poll.creator_username} userType={creator?.type}>
@@ -268,7 +335,7 @@ export default async function PollPage({ params }: Ctx) {
           })}
         />
       ) : null}
-    </div>
+    </article>
   );
 }
 

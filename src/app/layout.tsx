@@ -3,20 +3,40 @@ import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { I18nProvider } from "@/components/I18nProvider";
 import { readSessionUser } from "@/lib/auth/session";
+import { getSiteUrl } from "@/lib/env";
 import { dmSans, sourceSerif, voiceScript } from "@/lib/fonts";
 import { getLocale, getMessages, localeMeta } from "@/lib/i18n";
+import { absoluteUrl, toOpenGraphLocale } from "@/lib/seo/metadata";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const messages = await getMessages();
+  const locale = await getLocale();
+  const title = messages.app.name;
+  const description = messages.app.tagline;
+
   return {
+    metadataBase: new URL(getSiteUrl()),
     title: {
-      default: messages.app.name,
-      template: `%s · ${messages.app.name}`,
+      default: title,
+      template: `%s · ${title}`,
     },
-    description: messages.app.tagline,
+    description,
+    openGraph: {
+      type: "website",
+      siteName: title,
+      title,
+      description,
+      url: absoluteUrl("/"),
+      locale: toOpenGraphLocale(locale),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
   };
 }
 
