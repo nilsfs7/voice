@@ -22,7 +22,10 @@ export async function runMigrations() {
     throw new Error("DATABASE_URL is required");
   }
 
-  const connection = await mysql.createConnection(databaseUrl);
+  const connection = await mysql.createConnection({
+    uri: databaseUrl,
+    timezone: "Z",
+  });
   try {
     const schemaPath = path.join(process.cwd(), "db", "schema.sql");
     const schemaStatements = statementsFromFile(schemaPath);

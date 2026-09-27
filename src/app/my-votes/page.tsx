@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { LocalDateTime } from "@/components/LocalDateTime";
 import { readSessionUser } from "@/lib/auth/session";
+import { toIsoUtc } from "@/lib/datetime";
 import { getMessages } from "@/lib/i18n";
 import { pollHref } from "@/lib/polls/alias";
 import { listBallotsForUser } from "@/lib/polls/ballots";
@@ -52,7 +54,7 @@ export default async function MyVotesPage() {
                   : row.option_labels || "—"}
               </p>
               <p className="text-xs text-text-muted">
-                Ends {new Date(row.end_at).toLocaleString("en-GB")}
+                Ends <LocalDateTime value={toIsoUtc(row.end_at)} />
               </p>
             </Link>
           ))}

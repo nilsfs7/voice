@@ -10,7 +10,11 @@ type SqlParam = string | number | boolean | Date | null | Buffer;
 
 export function getPool(): Pool {
   if (!global.__voiceMysqlPool) {
-    global.__voiceMysqlPool = mysql.createPool(getDatabaseUrl());
+    // DATETIME columns store UTC wall-clock; mysql2 must not reinterpret via host TZ.
+    global.__voiceMysqlPool = mysql.createPool({
+      uri: getDatabaseUrl(),
+      timezone: "Z",
+    });
   }
   return global.__voiceMysqlPool;
 }

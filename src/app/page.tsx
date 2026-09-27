@@ -2,13 +2,14 @@ import Link from "next/link";
 import { FsmeetProfileTrigger } from "@/components/FsmeetProfileTrigger";
 import { HomeFilters } from "@/components/HomeFilters";
 import { JsonLd } from "@/components/JsonLd";
+import { PollCardRemaining } from "@/components/PollCardRemaining";
 import { displayName } from "@/lib/capabilities";
 import { voiceScript } from "@/lib/fonts";
 import { fetchFsmeetUsers } from "@/lib/fsmeet/users";
-import { formatCount, getMessages, getLocale } from "@/lib/i18n";
+import { toIsoUtc } from "@/lib/datetime";
+import { formatCount, getMessages } from "@/lib/i18n";
 import { readSessionUser } from "@/lib/auth/session";
 import { pollHref } from "@/lib/polls/alias";
-import { formatPollCardRemaining } from "@/lib/polls/remaining";
 import { listPollCreatorUsernames, listPolls } from "@/lib/polls/repository";
 import { websiteOrganizationGraph } from "@/lib/seo/json-ld";
 
@@ -28,7 +29,6 @@ export default async function HomePage({
 }) {
   const params = await searchParams;
   const messages = await getMessages();
-  const locale = await getLocale();
   const user = await readSessionUser();
   const sort =
     params.sort === "end_at" ||
@@ -183,7 +183,9 @@ export default async function HomePage({
                       })}
                     </span>
                     <span>Score {Number(poll.score ?? 0)}</span>
-                    <span>{formatPollCardRemaining(poll.end_at, messages, locale)}</span>
+                    <span>
+                      <PollCardRemaining endAt={toIsoUtc(poll.end_at)} />
+                    </span>
                   </div>
                 </Link>
               </div>
