@@ -10,6 +10,7 @@ import {
 import { getVoiceMinAge } from "@/lib/env";
 import { fetchFsmeetUser } from "@/lib/fsmeet/users";
 import { getOptions, getPollByPublicId } from "@/lib/polls/repository";
+import { toIsoUtc } from "@/lib/datetime";
 import { getMessages } from "@/lib/i18n";
 import { NOINDEX_ROBOTS } from "@/lib/seo/metadata";
 
@@ -20,11 +21,6 @@ export const metadata: Metadata = {
 };
 
 type Ctx = { params: Promise<{ publicId: string }> };
-
-function toLocalInput(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
 
 export default async function EditPollPage({ params }: Ctx) {
   const { publicId } = await params;
@@ -74,8 +70,8 @@ export default async function EditPollPage({ params }: Ctx) {
                 : String(defaultMinAge),
             maxAge: poll.max_age != null ? String(poll.max_age) : "",
             gender: poll.gender ?? "",
-            startAt: toLocalInput(new Date(poll.start_at)),
-            endAt: toLocalInput(new Date(poll.end_at)),
+            startAt: toIsoUtc(poll.start_at),
+            endAt: toIsoUtc(poll.end_at),
             options: options.map((o) => ({
               label: o.label,
               description: o.description ?? "",

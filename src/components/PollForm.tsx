@@ -1,11 +1,49 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Select } from "@/components/Select";
 import { useMessages } from "@/components/I18nProvider";
+import { toLocalInput } from "@/lib/datetime";
 
 type OptionDraft = { label: string; description: string };
+
+type PollFormFields = {
+  question: string;
+  description: string;
+  alias: string;
+  choiceMode: "single" | "multiple";
+  liveResultShares: boolean;
+  countryCode: string;
+  continentalCode: string;
+  minAge: string;
+  maxAge: string;
+  gender: "" | "male" | "female";
+  startAt: string;
+  endAt: string;
+  options: OptionDraft[];
+};
+
+function emptyForm(defaultMinAge: number): PollFormFields {
+  return {
+    question: "",
+    description: "",
+    alias: "",
+    choiceMode: "single",
+    liveResultShares: false,
+    countryCode: "",
+    continentalCode: "",
+    minAge: String(defaultMinAge),
+    maxAge: "",
+    gender: "",
+    startAt: "",
+    endAt: "",
+    options: [
+      { label: "", description: "" },
+      { label: "", description: "" },
+    ],
+  };
+}
 
 export function PollForm({
   mode,
@@ -16,50 +54,46 @@ export function PollForm({
   mode: "create" | "edit";
   publicId?: string;
   defaultMinAge: number;
-  initial?: {
-    question: string;
-    description: string;
-    alias: string;
-    choiceMode: "single" | "multiple";
-    liveResultShares: boolean;
-    countryCode: string;
-    continentalCode: string;
-    minAge: string;
-    maxAge: string;
-    gender: "" | "male" | "female";
+  /** `startAt` / `endAt` must be ISO-8601 instants (UTC); converted to local in the browser. */
+  initial?: Omit<PollFormFields, "startAt" | "endAt"> & {
     startAt: string;
     endAt: string;
-    options: OptionDraft[];
   };
 }) {
   const messages = useMessages();
   const router = useRouter();
-  const defaults = useMemo(() => {
-    const now = new Date();
-    const end = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const [form, setForm] = useState<PollFormFields>(() => {
+    if (!initial) return emptyForm(defaultMinAge);
     return {
-      question: "",
-      description: "",
-      alias: "",
-      choiceMode: "single" as const,
-      liveResultShares: false,
-      countryCode: "",
-      continentalCode: "",
-      minAge: String(defaultMinAge),
-      maxAge: "",
-      gender: "" as const,
-      startAt: toLocalInput(now),
-      endAt: toLocalInput(end),
-      options: [
-        { label: "", description: "" },
-        { label: "", description: "" },
-      ],
+      ...initial,
+      // Placeholder until client effect maps ISO → datetime-local in viewer TZ.
+      startAt: "",
+      endAt: "",
     };
-  }, [defaultMinAge]);
-
-  const [form, setForm] = useState(initial ?? defaults);
+  });
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  // datetime-local must use the browser TZ; server RSC TZ is often UTC (Docker).
+  useEffect(() => {
+    if (initial) {
+      setForm((current) => ({
+        ...current,
+        startAt: toLocalInput(new Date(initial.startAt)),
+        endAt: toLocalInput(new Date(initial.endAt)),
+      }));
+      return;
+    }
+    const now = new Date();
+    const end = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    setForm((current) => ({
+      ...current,
+      startAt: toLocalInput(now),
+      endAt: toLocalInput(end),
+    }));
+    // Intentionally once on mount — convert ISO → local in the viewer TZ only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -305,9 +339,4 @@ export function PollForm({
       </button>
     </form>
   );
-}
-
-function toLocalInput(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }

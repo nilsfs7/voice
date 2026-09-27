@@ -4,11 +4,13 @@ import { CommentsSection } from '@/components/CommentsSection';
 import { CreatorBallotRoster } from '@/components/CreatorBallotRoster';
 import { FsmeetProfileTrigger } from '@/components/FsmeetProfileTrigger';
 import { JsonLd } from '@/components/JsonLd';
+import { LocalDateTime } from '@/components/LocalDateTime';
 import { PollActions } from '@/components/PollActions';
 import { PollAudienceRules } from '@/components/PollAudienceRules';
 import { ResultCharts } from '@/components/ResultCharts';
 import { SharePollButton } from '@/components/SharePollButton';
 import { VotePanel } from '@/components/VotePanel';
+import { toIsoUtc } from '@/lib/datetime';
 import { canCreatePoll, canScore, canVote, checkVotePresenceGate, displayName, isVoiceAdmin } from '@/lib/capabilities';
 import { getFsmeetAccessToken, readSessionUser } from '@/lib/auth/session';
 import { fetchFsmeetUser, fetchFsmeetUsers } from '@/lib/fsmeet/users';
@@ -27,6 +29,15 @@ import {
 } from '@/lib/seo/metadata';
 
 export const dynamic = 'force-dynamic';
+
+const POLL_SCHEDULE_FORMAT: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'short',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+};
 
 type Ctx = { params: Promise<{ publicId: string }> };
 
@@ -247,7 +258,9 @@ export default async function PollPage({ params }: Ctx) {
           <span>{formatCount(messages.home.totalVotes, { count: totalVotes })}</span>
           <span>Score {Number(poll.score ?? 0)}</span>
           <span>
-            {new Date(poll.start_at).toLocaleString('en-GB')} → {new Date(poll.end_at).toLocaleString('en-GB')}
+            <LocalDateTime value={toIsoUtc(poll.start_at)} options={POLL_SCHEDULE_FORMAT} />
+            {' → '}
+            <LocalDateTime value={toIsoUtc(poll.end_at)} options={POLL_SCHEDULE_FORMAT} />
           </span>
         </div>
         <PollAudienceRules countryCode={poll.country_code} continentalCode={poll.continental_code} minAge={poll.min_age} maxAge={poll.max_age} gender={poll.gender} />

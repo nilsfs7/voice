@@ -86,6 +86,7 @@ Voice is one of three related systems.
 | TECH-18 | **Auth-only** and **draft** poll views are **`noindex`** | must | accepted | `/my-votes`, `/polls/new`, `/polls/.../edit`, and draft poll detail (creator view): `robots: { index: false, follow: false }`. Soft-deleted polls remain `notFound()` / excluded from sitemap (TECH-11) |
 | TECH-19 | **JSON-LD** structured data on public surfaces for classic SEO and AI extractors | must | accepted | `WebSite` + `Organization` (home/layout); `FAQPage` on FAQ (Q/A match visible copy); published polls: `Question` (name = question; do not invent `acceptedAnswer` from vote counts unless results are publicly visible). Keep schema in sync with rendered content |
 | TECH-20 | Public **`/llms.txt`** for AI / answer-engine discovery | could | rejected | Dropped from SEO pass — no `/llms.txt`; FAQ copy expansion not required beyond existing visible FAQ + FAQPage JSON-LD (TECH-19) |
+| TECH-21 | Voice **DATETIME** values are stored as **UTC** wall-clock; UI shows times in the **viewer’s local timezone** | must | accepted | mysql2 pool/migrate use `timezone: 'Z'`. Do not format poll schedule times in Server Components with the host TZ — use client components (`LocalDateTime`, form `datetime-local` via browser TZ) |
 
 ### 3.1 CI / Docker Hub (`.github/workflows/ci.yml`)
 
@@ -627,6 +628,7 @@ Define CSS variables; exact hex may be tuned in implementation.
 | 2026-09-16 | Multi-locale UI: EN/FR/ES/DE/JP/MY/IN/CN/SA (`en` `fr` `es` `de` `ja` `ms` `hi` `zh` `ar`) — NFR-04, FR-UI-012                                                     | agent + user            |
 | 2026-09-17 | Ballot roster shows FSMeet account age (`joined`); highlight / CSV flag when account younger than poll — FR-PO-035, FR-PO-036                                    | agent + user (DE input) |
 | 2026-09-23 | SEO requirements: metadataBase/OG/Twitter, robots.ts, poll metadata + canonical, noindex private/drafts, JSON-LD — TECH-15–TECH-19; reject TECH-20 (`/llms.txt`) and drop static-page i18n meta / FAQ expansion from this pass | agent + user            |
+| 2026-09-27 | UTC DATETIME storage (`timezone: 'Z'`) + viewer-local schedule display (TECH-21) | agent + user (DE input) |
 
 ---
 
