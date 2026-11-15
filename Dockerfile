@@ -1,4 +1,4 @@
-FROM node:24.15.0 AS build
+FROM node:26.13.1-trixie-slim AS build
 
 ARG AUTH_URL=https://dev.voice.fsmeet.dffb.org
 ARG BACKEND_URL_FSMEET=https://api.dev.fsmeet.dffb.org
@@ -23,7 +23,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM node:24.15.0
+FROM node:26.13.1-trixie-slim
 
 ARG AUTH_URL=https://dev.voice.fsmeet.dffb.org
 ARG BACKEND_URL_FSMEET=https://api.dev.fsmeet.dffb.org
